@@ -1,22 +1,17 @@
 import React, { useState } from 'react';
 import { ViewMode, DailyMission, EvolutionItem } from '../types';
-import { 
-  Brain, 
-  ArrowRight, 
-  CheckCircle2, 
-  TrendingUp, 
-  Sun, 
-  Scale, 
-  Cpu, 
-  Fingerprint, 
-  ShieldCheck, 
+import {
+  ArrowRight,
+  CheckCircle2,
+  TrendingUp,
+  Sun,
+  Scale,
   Zap,
-  Plus,
-  Play,
-  Sparkles
+  Cpu,
+  Fingerprint
 } from 'lucide-react';
 
-interface DashboardViewProps {
+interface TodayViewProps {
   userName: string;
   personaArchetype: string;
   consistencyScore: number;
@@ -25,10 +20,9 @@ interface DashboardViewProps {
   predictiveInsights: boolean;
   onNavigate: (view: ViewMode) => void;
   onToggleMission: (id: string) => void;
-  onAddEvolution: (item: Omit<EvolutionItem, 'id' | 'timestamp'>) => void;
 }
 
-export const DashboardView: React.FC<DashboardViewProps> = ({
+export const TodayView: React.FC<TodayViewProps> = ({
   userName,
   personaArchetype,
   consistencyScore,
@@ -36,8 +30,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   evolutionItems,
   predictiveInsights,
   onNavigate,
-  onToggleMission,
-  onAddEvolution
+  onToggleMission
 }) => {
   // ponytail: derive the next suggested focus from real data, not a canned string.
   const suggestedFocus = (() => {
@@ -47,37 +40,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return 'Maintain streak — run a simulator crucible to stress-test the persona.';
   })();
 
-  const [showEvolutionModal, setShowEvolutionModal] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newDesc, setNewDesc] = useState('');
-  const [newCategory, setNewCategory] = useState('Cognitive Calibration');
+  const [showAllMissions, setShowAllMissions] = useState(false);
 
   const activeMission = dailyMissions[0] || {
     id: 'm1',
     title: "Do the thing you've been avoiding...",
     description: 'Focus your energy on completing the most challenging strategic task today. Delaying it only drains cognitive resources.',
-    status: 'pending',
+    status: 'pending' as const,
     category: 'Strategic Prioritization',
     xp: 250
   };
 
-  const handleAddEvolutionSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTitle.trim() || !newDesc.trim()) return;
-    onAddEvolution({
-      title: newTitle,
-      description: newDesc,
-      icon: 'trending_up',
-      category: newCategory,
-      changeValue: '+5% Baseline'
-    });
-    setNewTitle('');
-    setNewDesc('');
-    setShowEvolutionModal(false);
-  };
+  // ponytail: cut the Pomodoro focus timer that used to live in DailyModeView.
+  // State machine (3 modes x start/pause/reset) that didn't drive any consistency
+  // calculation was dead weight on the home screen. Add back to Journal if focus
+  // time tracking becomes a real metric.
 
-  // SVG circular calculation for 82%
-  // Circumference = 2 * PI * 45 = ~282.74
+  // SVG circular calculation for the consistency ring
   const radius = 45;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (consistencyScore / 100) * circumference;
@@ -95,19 +74,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </h1>
       </header>
 
-      {/* Bento Grid Layout */}
+      {/* Top row: today's mission + consistency ring */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Daily Mission Card (Large, col-span-2) */}
         <div className="lg:col-span-2 neo-card rounded-2xl p-8 bg-[#121212] flex flex-col justify-between border border-[#1e1e1e]/60 relative overflow-hidden group">
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
-              <span className="font-mono-code text-xs uppercase tracking-widest text-[#8e9192] flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#c8c6c5]" />
-                Daily Mission
+              <span className="font-mono-code text-xs uppercase tracking-widest text-[#8e9192]">
+                Today's focus
               </span>
-              <div className="p-2 rounded-lg neo-recessed bg-[#121212]">
-                <Brain className="w-5 h-5 text-[#c8c6c5]" />
-              </div>
+              <span className="font-mono-code text-[10px] uppercase tracking-widest text-[#8e9192]">
+                {dailyMissions.filter((m) => m.status === 'completed').length} / {dailyMissions.length} done
+              </span>
             </div>
 
             <h2 className="font-display text-2xl md:text-3xl text-[#e5e2e1] font-semibold mb-4 tracking-tight">
@@ -128,10 +105,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
             <div className="flex items-center gap-3">
               <button
-                onClick={() => onNavigate('daily')}
+                onClick={() => setShowAllMissions((v) => !v)}
                 className="font-mono-code text-xs text-[#8e9192] hover:text-[#e5e2e1] px-3 py-2 transition-colors"
               >
-                View Protocol &rarr;
+                {showAllMissions ? 'Hide list' : 'View all'} &rarr;
               </button>
 
               <button
@@ -145,40 +122,52 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 {activeMission.status === 'completed' ? (
                   <>
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    <span>MISSION FULFILLED</span>
+                    <span>DONE</span>
                   </>
                 ) : (
                   <>
-                    <span>ACCEPT MISSION</span>
+                    <span>MARK DONE</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>
             </div>
           </div>
+
+          {showAllMissions && dailyMissions.length > 1 && (
+            <ul className="mt-4 space-y-2 relative z-10">
+              {dailyMissions.slice(1).map((m) => (
+                <li key={m.id} className="flex items-center gap-2 text-xs font-mono-code text-[#8e9192]">
+                  <button
+                    onClick={() => onToggleMission(m.id)}
+                    className="w-4 h-4 rounded border border-[#2a2a2a] flex items-center justify-center hover:border-[#c8c6c5]"
+                    aria-label={m.status === 'completed' ? 'Mark pending' : 'Mark done'}
+                  >
+                    {m.status === 'completed' && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
+                  </button>
+                  <span className={m.status === 'completed' ? 'line-through text-[#7e7d7d]' : 'text-[#c8c6c5]'}>
+                    {m.title}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Consistency Ring Card (col-span-1) */}
         <div className="neo-card rounded-2xl p-8 bg-[#121212] flex flex-col items-center justify-center text-center border border-[#1e1e1e]/60">
           <span className="font-mono-code text-xs uppercase tracking-widest text-[#8e9192] mb-6 w-full text-left flex items-center justify-between">
-            <span>Persona Consistency</span>
+            <span>Momentum</span>
             <span className="text-[#c8c6c5] font-semibold">{consistencyScore}%</span>
           </span>
 
-          <div 
-            onClick={() => onNavigate('dna')} 
+          <div
+            onClick={() => onNavigate('dna')}
             className="cursor-pointer group relative w-44 h-44 neo-recessed rounded-full flex items-center justify-center mb-4 transition-transform hover:scale-105"
             title="Click to calibrate DNA"
           >
             <svg className="w-full h-full absolute top-0 left-0 -rotate-90 p-3" viewBox="0 0 100 100">
-              <circle
-                cx="50"
-                cy="50"
-                r={radius}
-                fill="none"
-                stroke="#1f1e1e"
-                strokeWidth="6"
-              />
+              <circle cx="50" cy="50" r={radius} fill="none" stroke="#1f1e1e" strokeWidth="6" />
               <circle
                 cx="50"
                 cy="50"
@@ -197,55 +186,53 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <span className="font-display text-4xl font-bold text-[#c8c6c5] tracking-tight">
                 {consistencyScore}<span className="text-xl font-normal text-[#8e9192]">%</span>
               </span>
-              <span className="font-mono-code text-[10px] text-[#8e9192] uppercase mt-0.5">Alignment</span>
+              <span className="font-mono-code text-[10px] text-[#8e9192] uppercase mt-0.5">This week</span>
             </div>
           </div>
 
           <p className="font-body text-sm text-[#8e9192] mt-2 leading-relaxed">
-            Strong alignment with <span className="text-[#e5e2e1] font-medium">'{personaArchetype || 'The Strategic Operator'}'</span> archetype this week.
+            Alignment with <span className="text-[#e5e2e1] font-medium">'{personaArchetype || 'The Strategic Operator'}'</span>.
           </p>
 
           {predictiveInsights && (
             <div className="mt-4 p-3 rounded-xl border border-[#2a2a2a] bg-[#161616] flex items-start gap-2">
-              <Sparkles className="w-4 h-4 text-[#c8c6c5] mt-0.5 shrink-0" />
+              <Zap className="w-4 h-4 text-[#c8c6c5] mt-0.5 shrink-0" />
               <p className="font-mono-code text-xs text-[#c8c6c5] uppercase tracking-wider leading-relaxed">
-                Predictive focus: {suggestedFocus}
+                Suggested: {suggestedFocus}
               </p>
             </div>
           )}
         </div>
+      </div>
 
-        {/* Recent Evolution Section (full width span-3) */}
-        <div className="lg:col-span-3 neo-card rounded-2xl p-8 bg-[#121212] border border-[#1e1e1e]/60">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="font-display text-2xl text-[#e5e2e1] font-semibold tracking-tight">
-                Recent Evolution
-              </h3>
-              <p className="font-mono-code text-xs text-[#8e9192] mt-1">
-                Real-time neuroplastic and behavioral delta logs
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowEvolutionModal(true)}
-                className="neo-btn px-4 py-2 rounded-xl text-xs font-mono-code text-[#c8c6c5] flex items-center gap-1.5 border border-[#2a2a2a]"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Log Breakthrough</span>
-              </button>
-
-              <button 
-                onClick={() => onNavigate('evolution')}
-                className="p-2 rounded-lg neo-recessed text-[#8e9192] hover:text-[#c8c6c5]"
-                title="View full evolution history"
-              >
-                <TrendingUp className="w-5 h-5" />
-              </button>
-            </div>
+      {/* Recent Evolution Section */}
+      <div className="neo-card rounded-2xl p-8 bg-[#121212] border border-[#1e1e1e]/60">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="font-display text-2xl text-[#e5e2e1] font-semibold tracking-tight">
+              Recent Evolution
+            </h3>
+            <p className="font-mono-code text-xs text-[#8e9192] mt-1">
+              Your latest breakthroughs
+            </p>
           </div>
 
+          <button
+            onClick={() => onNavigate('more-evolution')}
+            className="neo-recessed px-4 py-2 rounded-xl text-xs font-mono-code text-[#8e9192] hover:text-[#c8c6c5] border border-[#1e1e1e]"
+          >
+            See all &rarr;
+          </button>
+        </div>
+
+        {evolutionItems.length === 0 ? (
+          <div className="neo-recessed p-8 rounded-xl text-center border border-[#1e1e1e]">
+            <p className="font-body text-sm text-[#8e9192]">No breakthroughs yet.</p>
+            <p className="font-mono-code text-[11px] text-[#7e7d7d] mt-2">
+              Log one in <span className="text-[#c8c6c5]">Journal &rarr; Timeline</span> when you embody your archetype under pressure.
+            </p>
+          </div>
+        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {evolutionItems.slice(0, 4).map((item, idx) => (
               <div
@@ -285,16 +272,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
             ))}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* CTA Section */}
-      <div className="pt-4 text-center flex flex-col md:flex-row items-center justify-center gap-4">
+      {/* Quick links */}
+      <div className="pt-4 flex flex-col md:flex-row items-center justify-center gap-4">
         <button
-          onClick={() => onNavigate('simulator')}
+          onClick={() => onNavigate('train')}
           className="w-full md:w-auto neo-btn px-8 py-4 rounded-full font-mono-code text-xs text-[#c8c6c5] uppercase tracking-widest inline-flex items-center justify-center gap-3 border border-[#2a2a2a] hover:text-white font-semibold cursor-pointer group"
         >
-          <span>Continue Persona Evolution</span>
+          <span>Practice a scenario</span>
           <Cpu className="w-4 h-4 group-hover:rotate-12 transition-transform" />
         </button>
 
@@ -303,85 +290,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           className="w-full md:w-auto neo-recessed px-6 py-4 rounded-full font-mono-code text-xs text-[#8e9192] hover:text-[#c8c6c5] uppercase tracking-widest inline-flex items-center justify-center gap-2 border border-[#1e1e1e] transition-colors"
         >
           <Fingerprint className="w-4 h-4" />
-          <span>Calibrate DNA (6 Traits)</span>
+          <span>Calibrate DNA</span>
         </button>
       </div>
-
-      {/* Modal for logging new evolution */}
-      {showEvolutionModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-[#121212] neo-extruded-large rounded-2xl p-6 border border-[#2a2a2a]">
-            <h3 className="font-display text-xl font-bold text-[#c8c6c5] mb-2">
-              Log Persona Breakthrough
-            </h3>
-            <p className="font-body text-xs text-[#8e9192] mb-6">
-              Record a real-world decision where you embodied your target archetype under pressure.
-            </p>
-
-            <form onSubmit={handleAddEvolutionSubmit} className="space-y-4">
-              <div>
-                <label className="block font-mono-code text-xs text-[#c4c7c7] mb-1.5 uppercase">
-                  Breakthrough Title
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="e.g. Asymmetric Negotiation Restraint"
-                  className="w-full h-12 bg-[#121212] rounded-xl neo-input px-4 text-sm text-[#e5e2e1] border border-[#1e1e1e]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-mono-code text-xs text-[#c4c7c7] mb-1.5 uppercase">
-                  Category
-                </label>
-                <select
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  className="w-full h-12 bg-[#121212] rounded-xl neo-input px-4 text-sm text-[#e5e2e1] border border-[#1e1e1e]"
-                >
-                  <option value="Habit Anchor">Habit Anchor</option>
-                  <option value="Composure Calibration">Composure Calibration</option>
-                  <option value="Cognitive Endurance">Cognitive Endurance</option>
-                  <option value="Strategic Leverage">Strategic Leverage</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-mono-code text-xs text-[#c4c7c7] mb-1.5 uppercase">
-                  Behavioral Outcome & Metrics
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  value={newDesc}
-                  onChange={(e) => setNewDesc(e.target.value)}
-                  placeholder="Describe what happened and how your response differed from your old default pattern."
-                  className="w-full bg-[#121212] rounded-xl neo-input p-4 text-sm text-[#e5e2e1] border border-[#1e1e1e]"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-[#1e1e1e]">
-                <button
-                  type="button"
-                  onClick={() => setShowEvolutionModal(false)}
-                  className="px-5 py-2.5 rounded-xl font-mono-code text-xs text-[#8e9192] hover:text-[#e5e2e1]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="neo-btn px-6 py-2.5 rounded-xl font-mono-code text-xs text-[#c8c6c5] border border-[#2a2a2a] hover:text-white"
-                >
-                  Save Log Entry
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -1,15 +1,14 @@
+// Primary nav surface: 4 tabs + More menu sub-routes for demoted features.
 export type ViewMode =
   | 'login'
-  | 'dashboard'
-  | 'persona'
+  | 'today'
   | 'dna'
-  | 'daily'
-  | 'simulator'
-  | 'habits'
-  | 'reflections'
-  | 'evolution'
-  | 'references'
-  | 'settings';
+  | 'train'
+  | 'journal'
+  | 'more-persona'
+  | 'more-references'
+  | 'more-evolution'
+  | 'more-settings';
 
 export interface UserSession {
   email: string;

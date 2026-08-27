@@ -19,10 +19,10 @@ describe('type shape/contracts', () => {
 
   it('ViewMode covers all app views', () => {
     const modes: ViewMode[] = [
-      'login', 'dashboard', 'persona', 'dna', 'daily',
-      'simulator', 'habits', 'reflections', 'evolution', 'references', 'settings',
+      'login', 'today', 'dna', 'train', 'journal',
+      'more-persona', 'more-references', 'more-evolution', 'more-settings',
     ];
-    expect(modes.length).toBe(11);
+    expect(modes.length).toBe(9);
   });
 
   it('ReferenceItem category union matches seed categories', () => {

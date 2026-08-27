@@ -21,15 +21,14 @@ import {
 } from './data/initialData';
 import { Navigation } from './components/Navigation';
 import { LoginView } from './components/LoginView';
-import { DashboardView } from './components/DashboardView';
+import { TodayView } from './components/TodayView';
+import { TrainView } from './components/TrainView';
+import { JournalView } from './components/JournalView';
 import { DNAEditorView } from './components/DNAEditorView';
-import { ReferenceLibraryView } from './components/ReferenceLibraryView';
+import { MoreMenu } from './components/MoreMenu';
 import { SettingsView } from './components/SettingsView';
 import { MyPersonaView } from './components/MyPersonaView';
-import { DailyModeView } from './components/DailyModeView';
-import { SimulatorView } from './components/SimulatorView';
-import { HabitsView } from './components/HabitsView';
-import { ReflectionsView } from './components/ReflectionsView';
+import { ReferenceLibraryView } from './components/ReferenceLibraryView';
 import { EvolutionView } from './components/EvolutionView';
 
 export default function App() {
@@ -46,7 +45,7 @@ export default function App() {
 
   // Current View
   const [currentView, setCurrentView] = useState<ViewMode>(() => {
-    return session.isAuthenticated ? 'dashboard' : 'login';
+    return session.isAuthenticated ? 'today' : 'login';
   });
 
   // Traits State
@@ -266,6 +265,10 @@ export default function App() {
     setEvolutionItems((prev) => [newEvolution, ...prev]);
   };
 
+  // ponytail: track the More sheet as overlay state, not a route.
+  // When open, it sits on top of whatever demoted view the user picks.
+  const [moreOpen, setMoreOpen] = useState(false);
+
   // If in login view, render clean single login screen
   if (currentView === 'login') {
     return <LoginView onLogin={handleLogin} />;
@@ -277,15 +280,17 @@ export default function App() {
       <Navigation
         currentView={currentView}
         onNavigate={setCurrentView}
-        session={session}
+        userEmail={session.email}
+        personaName={session.personaName}
         onLogout={handleLogout}
+        onOpenMore={() => setMoreOpen(true)}
       />
 
       {/* Main Content Area */}
       <main className="flex-1 min-w-0 md:ml-72 p-4 sm:p-6 md:p-10 lg:p-12 mb-20 md:mb-0">
         <div key={currentView} className="animate-view-in">
-        {currentView === 'dashboard' && (
-          <DashboardView
+        {currentView === 'today' && (
+          <TodayView
             userName={session.personaName || 'Ching'}
             personaArchetype={session.archetype || 'THE STRATEGIC OPERATOR'}
             consistencyScore={consistencyScore}
@@ -294,7 +299,6 @@ export default function App() {
             predictiveInsights={session.predictiveInsights}
             onNavigate={setCurrentView}
             onToggleMission={handleToggleMission}
-            onAddEvolution={handleAddEvolution}
           />
         )}
 
@@ -318,24 +322,30 @@ export default function App() {
           />
         )}
 
-        {currentView === 'references' && (
-          <ReferenceLibraryView
-            references={references}
+        {currentView === 'train' && (
+          <TrainView
+            scenarios={scenarios}
             activeTraits={traits}
-            onApplyReference={handleApplyReference}
+            references={references}
             blendedReferences={blendedReferences}
+            onRecordSimulationResult={handleRecordSimulationResult}
+            onApplyReference={handleApplyReference}
           />
         )}
 
-        {currentView === 'settings' && (
-          <SettingsView
-            session={session}
-            onUpdateSession={handleUpdateSession}
-            onPurgeData={handlePurgeData}
+        {currentView === 'journal' && (
+          <JournalView
+            habits={habits}
+            onToggleHabitDay={handleToggleHabitDay}
+            onAddHabit={handleAddHabit}
+            reflections={reflections}
+            onAddReflection={handleAddReflection}
+            evolutionItems={evolutionItems}
+            onAddEvolution={handleAddEvolution}
           />
         )}
 
-        {currentView === 'persona' && (
+        {currentView === 'more-persona' && (
           <MyPersonaView
             personaName={session.personaName}
             archetype={session.archetype}
@@ -347,46 +357,39 @@ export default function App() {
           />
         )}
 
-        {currentView === 'daily' && (
-          <DailyModeView
-            missions={dailyMissions}
-            onToggleMission={handleToggleMission}
-            onAddMission={handleAddMission}
-          />
-        )}
-
-        {currentView === 'simulator' && (
-          <SimulatorView
-            scenarios={scenarios}
+        {currentView === 'more-references' && (
+          <ReferenceLibraryView
+            references={references}
             activeTraits={traits}
-            onRecordSimulationResult={handleRecordSimulationResult}
+            onApplyReference={handleApplyReference}
+            blendedReferences={blendedReferences}
           />
         )}
 
-        {currentView === 'habits' && (
-          <HabitsView
-            habits={habits}
-            onToggleHabitDay={handleToggleHabitDay}
-            onAddHabit={handleAddHabit}
-          />
-        )}
-
-        {currentView === 'reflections' && (
-          <ReflectionsView
-            reflections={reflections}
-            onAddReflection={handleAddReflection}
-          />
-        )}
-
-        {currentView === 'evolution' && (
+        {currentView === 'more-evolution' && (
           <EvolutionView
             evolutionItems={evolutionItems}
             traits={traits}
             consistencyScore={consistencyScore}
           />
         )}
+
+        {currentView === 'more-settings' && (
+          <SettingsView
+            session={session}
+            onUpdateSession={handleUpdateSession}
+            onPurgeData={handlePurgeData}
+          />
+        )}
         </div>
       </main>
+
+      {/* More menu overlay — picks one of the demoted destinations */}
+      <MoreMenu
+        open={moreOpen}
+        onClose={() => setMoreOpen(false)}
+        onNavigate={setCurrentView}
+      />
     </div>
   );
 }
