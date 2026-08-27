@@ -100,7 +100,7 @@ export const Navigation: React.FC<NavigationProps> = ({
         </div>
 
         {/* Navigation Links */}
-        <div className="flex flex-col gap-1.5 flex-1">
+        <div className="flex flex-col gap-3 flex-1">
           {navItems.map((item) => {
             const isActive = currentView === item.id;
             return (
