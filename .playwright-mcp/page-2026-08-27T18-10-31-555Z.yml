@@ -1,0 +1,90 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5] [cursor=pointer]:
+      - heading "Persona Forge" [level=1] [ref=e11]
+      - paragraph [ref=e12]: Evolution Engine
+    - generic [ref=e13]:
+      - button "Home" [ref=e14]
+      - button "My Persona" [ref=e20]
+      - button "DNA" [active] [ref=e27]
+      - button "Daily Mode" [ref=e40]
+      - button "Simulator AI" [ref=e45]:
+        - generic [ref=e50]: Simulator
+        - generic [ref=e51]: AI
+      - button "Habits" [ref=e52]
+      - button "Reflections" [ref=e58]
+      - button "Evolution" [ref=e69]
+      - button "References" [ref=e75]
+      - button "Settings" [ref=e80]
+    - generic [ref=e86]:
+      - generic [ref=e87] [cursor=pointer]:
+        - img "Avatar" [ref=e89]
+        - generic [ref=e90]: Operator
+      - button "Lock Terminal" [ref=e92]
+  - main [ref=e97]:
+    - generic [ref=e228]:
+      - generic [ref=e230]:
+        - generic [ref=e231]:
+          - heading "DNA Editor" [level=1] [ref=e232]
+          - paragraph [ref=e233]: Calibrate your core psychological traits. Adjusting these parameters alters your persona's baseline responses in the Simulator and Daily Mode.
+        - button "Add Custom Trait" [ref=e234]
+      - generic [ref=e237]:
+        - generic [ref=e239]:
+          - generic [ref=e240]:
+            - generic [ref=e241]:
+              - generic [ref=e242]:
+                - generic [ref=e243]: Discipline
+                - generic [ref=e251]: 75%
+              - slider "Calibrate Discipline" [ref=e253] [cursor=pointer]: "75"
+              - paragraph [ref=e254]: Ability to adhere to rigorous operational standards and execution protocols regardless of emotional state.
+            - generic [ref=e255]:
+              - generic [ref=e256]:
+                - generic [ref=e257]: Confidence
+                - generic [ref=e262]: 82%
+              - slider "Calibrate Confidence" [ref=e264] [cursor=pointer]: "82"
+              - paragraph [ref=e265]: Baseline self-belief in executing unproven strategies under high ambiguity and high stakes.
+            - generic [ref=e266]:
+              - generic [ref=e267]:
+                - generic [ref=e268]: Charisma
+                - generic [ref=e272]: 60%
+              - slider "Calibrate Charisma" [ref=e274] [cursor=pointer]: "60"
+              - paragraph [ref=e275]: Interpersonal leverage, persuasive framing, and gravitational authority in group dynamics.
+            - generic [ref=e276]:
+              - generic [ref=e277]:
+                - generic [ref=e278]: Creativity
+                - generic [ref=e282]: 90%
+              - slider "Calibrate Creativity" [ref=e284] [cursor=pointer]: "90"
+              - paragraph [ref=e285]: Divergent lateral thinking, counter-intuitive synthesis, and unconventional problem-solving capacity.
+            - generic [ref=e286]:
+              - generic [ref=e287]:
+                - generic [ref=e288]: Ambition
+                - generic [ref=e295]: 85%
+              - slider "Calibrate Ambition" [ref=e297] [cursor=pointer]: "85"
+              - paragraph [ref=e298]: Scale of vision, appetite for asymmetrical upside, and intolerance for median outcomes.
+            - generic [ref=e299]:
+              - generic [ref=e300]:
+                - generic [ref=e301]: Composure
+                - generic [ref=e305]: 45%
+              - slider "Calibrate Composure" [ref=e307] [cursor=pointer]: "45"
+              - paragraph [ref=e308]: Physiological and psychological equilibrium when confronting chaos, conflict, or sudden catastrophe.
+          - generic [ref=e309]:
+            - button "RESET BASELINE" [ref=e310] [cursor=pointer]
+            - button "SAVE VERSION" [ref=e316] [cursor=pointer]
+        - complementary [ref=e322]:
+          - generic [ref=e323]:
+            - heading "Persona Summary" [level=3] [ref=e324]
+            - generic [ref=e328]:
+              - heading "Archetype Analysis" [level=4] [ref=e329]
+              - paragraph [ref=e330]: Highly creative and ambitious profile. Shows strong self-belief (Confidence 82%) with supreme divergent synthesis capacity (90%). May struggle under prolonged emotional chaos due to lower composure baseline (45%).
+            - generic [ref=e331]:
+              - heading "Projected Behaviors" [level=4] [ref=e332]
+              - list [ref=e333]:
+                - listitem [ref=e334]:
+                  - generic [ref=e338]: High likelihood of initiating original, high-leverage projects.
+                - listitem [ref=e339]:
+                  - generic [ref=e343]: Assertive and frame-controlling communication in simulator.
+                - listitem [ref=e344]:
+                  - generic [ref=e347]: Potential for reactive decisions during sudden crisis events.
+                - listitem [ref=e348]:
+                  - generic [ref=e352]: Adheres to morning priming protocols with 90%+ probability.
+            - paragraph [ref=e356]: "Tip: Visit the Reference Library to blend historical archetypes directly into your DNA matrix."

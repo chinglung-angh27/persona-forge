@@ -1,0 +1,90 @@
+- generic [ref=f5e3]:
+  - navigation [ref=f5e4]:
+    - generic [ref=f5e5] [cursor=pointer]:
+      - heading "Persona Forge" [level=1] [ref=f5e11]
+      - paragraph [ref=f5e12]: Evolution Engine
+    - generic [ref=f5e13]:
+      - button "Home" [ref=f5e14]
+      - button "My Persona" [ref=f5e20]
+      - button "DNA" [ref=f5e27]
+      - button "Daily Mode" [ref=f5e40]
+      - button "Simulator AI" [ref=f5e45]:
+        - generic [ref=f5e50]: Simulator
+        - generic [ref=f5e51]: AI
+      - button "Habits" [ref=f5e52]
+      - button "Reflections" [ref=f5e58]
+      - button "Evolution" [ref=f5e69]
+      - button "References" [ref=f5e75]
+      - button "Settings" [ref=f5e80]
+    - generic [ref=f5e86]:
+      - generic [ref=f5e87] [cursor=pointer]:
+        - img "Avatar" [ref=f5e89]
+        - generic [ref=f5e90]: Operator
+      - button "Lock Terminal" [ref=f5e92]
+  - main [ref=f5e97]:
+    - generic [ref=f5e99]:
+      - generic [ref=f5e100]:
+        - paragraph [ref=f5e101]: Good morning, Ching.
+        - heading "THE STRATEGIC OPERATOR" [level=1] [ref=f5e103]
+      - generic [ref=f5e104]:
+        - generic [ref=f5e105]:
+          - generic [ref=f5e106]:
+            - generic [ref=f5e107]: Daily Mission
+            - heading "Do the thing you've been avoiding..." [level=2] [ref=f5e121]
+            - paragraph [ref=f5e122]: Focus your energy on completing the most challenging strategic task today. Delaying it only drains cognitive resources.
+          - generic [ref=f5e123]:
+            - generic [ref=f5e124]:
+              - generic [ref=f5e125]: Strategic Prioritization
+              - generic [ref=f5e126]: +250 XP
+            - generic [ref=f5e127]:
+              - button "View Protocol →" [ref=f5e128]
+              - button "ACCEPT MISSION" [ref=f5e129]
+        - generic [ref=f5e133]:
+          - generic [ref=f5e134]:
+            - generic [ref=f5e135]: Persona Consistency
+            - generic [ref=f5e136]: 7%
+          - generic "Click to calibrate DNA" [ref=f5e137] [cursor=pointer]:
+            - generic [ref=f5e141]:
+              - generic [ref=f5e142]: 7%
+              - generic [ref=f5e143]: Alignment
+          - paragraph [ref=f5e144]:
+            - text: Strong alignment with
+            - generic [ref=f5e145]: "'THE STRATEGIC OPERATOR'"
+            - text: archetype this week.
+          - paragraph [ref=f5e150]: "Predictive focus: Clear 3 open missions to lift alignment."
+        - generic [ref=f5e151]:
+          - generic [ref=f5e152]:
+            - generic [ref=f5e153]:
+              - heading "Recent Evolution" [level=3] [ref=f5e154]
+              - paragraph [ref=f5e155]: Real-time neuroplastic and behavioral delta logs
+            - generic [ref=f5e156]:
+              - button "Log Breakthrough" [ref=f5e157]
+              - button "View full evolution history" [ref=f5e160]
+          - generic [ref=f5e164]:
+            - generic [ref=f5e173]:
+              - generic [ref=f5e174]:
+                - heading "Morning Routine" [level=4] [ref=f5e175]
+                - generic [ref=f5e176]: +12%
+              - paragraph [ref=f5e177]: Successfully integrated 15 minutes of strategic planning before checking communications. Consistency improved by 12%.
+              - generic [ref=f5e178]: Today, 07:30
+            - generic [ref=f5e185]:
+              - generic [ref=f5e186]:
+                - heading "Conflict Reaction" [level=4] [ref=f5e187]
+                - generic [ref=f5e188]: "-18% Stress Variance"
+              - paragraph [ref=f5e189]: Maintained objective detachment during high-stress team sync. Emotional variance decreased.
+              - generic [ref=f5e190]: Yesterday, 16:45
+            - generic [ref=f5e196]:
+              - generic [ref=f5e197]:
+                - heading "Deep Work Velocity" [level=4] [ref=f5e198]
+                - generic [ref=f5e199]: +25m Focus Block
+              - paragraph [ref=f5e200]: Sustained 120 minutes of uninterrupted architectural problem-solving without task switching.
+              - generic [ref=f5e201]: 2 days ago
+            - generic [ref=f5e206]:
+              - generic [ref=f5e207]:
+                - 'heading "DNA Trait Upgrade: Ambition" [level=4] [ref=f5e208]'
+                - generic [ref=f5e209]: +4 Pts
+              - paragraph [ref=f5e210]: Recalibrated ambition baseline following successful milestone execution and new reference integration.
+              - generic [ref=f5e211]: 3 days ago
+      - generic [ref=f5e212]:
+        - button "Continue Persona Evolution" [ref=f5e213] [cursor=pointer]
+        - button "Calibrate DNA (6 Traits)" [ref=f5e218]

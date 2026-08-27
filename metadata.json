@@ -1,0 +1,6 @@
+{
+  "name": "Persona Forge",
+  "description": "An Obsidian Tactile psychological evolution engine for calibrating persona DNA, testing simulations, and mastering daily operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
