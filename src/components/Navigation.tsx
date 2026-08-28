@@ -1,5 +1,5 @@
 import React from 'react';
-import { ViewMode } from '../types';
+import { ViewMode, Persona } from '../types';
 import {
   Sun,
   Fingerprint,
@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Settings
 } from 'lucide-react';
+import { PersonaSwitcher } from './PersonaSwitcher';
 
 interface NavigationProps {
   currentView: ViewMode;
@@ -22,6 +23,11 @@ interface NavigationProps {
   personaName: string;
   onLogout: () => void;
   onOpenMore: () => void;
+  personas: Persona[];
+  activePersonaId: string;
+  onSwitchPersona: (id: string) => void;
+  onOpenLibrary: () => void;
+  onOpenCreate: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
@@ -30,7 +36,12 @@ export const Navigation: React.FC<NavigationProps> = ({
   userEmail,
   personaName,
   onLogout,
-  onOpenMore
+  onOpenMore,
+  personas,
+  activePersonaId,
+  onSwitchPersona,
+  onOpenLibrary,
+  onOpenCreate,
 }) => {
   // 4 primary tabs. Anything else (persona profile, references, evolution, settings)
   // lives under the More menu.
@@ -46,37 +57,48 @@ export const Navigation: React.FC<NavigationProps> = ({
   return (
     <>
       {/* Mobile Top Nav Bar */}
-      <header className="md:hidden fixed top-0 left-0 w-full z-40 bg-[#121212] shadow-[-6px_-6px_12px_rgba(255,255,255,0.03),6px_6px_12px_rgba(0,0,0,0.5)] flex justify-between items-center h-20 px-6 border-b border-[#1c1b1b]">
-        <div
-          onClick={() => onNavigate('today')}
-          className="cursor-pointer flex items-center gap-3"
-        >
-          <div className="w-9 h-9 rounded-lg bg-[#121212] neo-extruded-sm flex items-center justify-center p-1.5 border border-[#2a2a2a]/40">
-            <Sparkles className="w-5 h-5 text-[#c8c6c5]" />
-          </div>
-          <div>
-            <div className="font-display text-xl font-bold tracking-tight text-[#c8c6c5]">Persona Forge</div>
-            <div className="font-mono-code text-[10px] text-[#8e9192] uppercase tracking-widest">Evolution Engine</div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
+      <header className="md:hidden fixed top-0 left-0 w-full z-40 bg-[#121212] shadow-[-6px_-6px_12px_rgba(255,255,255,0.03),6px_6px_12px_rgba(0,0,0,0.5)] flex flex-col gap-3 px-6 pt-3 pb-3 border-b border-[#1c1b1b]">
+        <div className="flex justify-between items-center h-14">
+          <div
             onClick={() => onNavigate('today')}
-            className="w-10 h-10 rounded-full bg-[#121212] neo-btn flex items-center justify-center text-[#c8c6c5] hover:text-white"
-            title="Today"
+            className="cursor-pointer flex items-center gap-3"
           >
-            <Bell className="w-4 h-4" />
-          </button>
+            <div className="w-9 h-9 rounded-lg bg-[#121212] neo-extruded-sm flex items-center justify-center p-1.5 border border-[#2a2a2a]/40">
+              <Sparkles className="w-5 h-5 text-[#c8c6c5]" />
+            </div>
+            <div>
+              <div className="font-display text-xl font-bold tracking-tight text-[#c8c6c5]">Persona Forge</div>
+              <div className="font-mono-code text-[10px] text-[#8e9192] uppercase tracking-widest">Evolution Engine</div>
+            </div>
+          </div>
 
-          <button
-            onClick={onOpenMore}
-            className={`w-10 h-10 rounded-full bg-[#121212] neo-extruded flex items-center justify-center overflow-hidden border ${isMoreOpen ? 'border-[#c8c6c5]' : 'border-[#2a2a2a]'}`}
-            title="More"
-          >
-            <MoreHorizontal className="w-5 h-5 text-[#c8c6c5]" />
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onNavigate('today')}
+              className="w-10 h-10 rounded-full bg-[#121212] neo-btn flex items-center justify-center text-[#c8c6c5] hover:text-white"
+              title="Today"
+            >
+              <Bell className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={onOpenMore}
+              className={`w-10 h-10 rounded-full bg-[#121212] neo-extruded flex items-center justify-center overflow-hidden border ${isMoreOpen ? 'border-[#c8c6c5]' : 'border-[#2a2a2a]'}`}
+              title="More"
+            >
+              <MoreHorizontal className="w-5 h-5 text-[#c8c6c5]" />
+            </button>
+          </div>
         </div>
+
+        {/* PersonaSwitcher — compact on mobile top bar */}
+        <PersonaSwitcher
+          personas={personas}
+          activePersonaId={activePersonaId}
+          onSwitch={onSwitchPersona}
+          onOpenLibrary={onOpenLibrary}
+          onOpenCreate={onOpenCreate}
+        />
       </header>
 
       {/* Desktop Sidebar Navigation */}
@@ -97,6 +119,17 @@ export const Navigation: React.FC<NavigationProps> = ({
           <p className="font-mono-code text-[11px] text-[#8e9192] uppercase tracking-widest pl-1">
             Evolution Engine
           </p>
+        </div>
+
+        {/* PersonaSwitcher — prominent, right after brand header */}
+        <div className="mb-2">
+          <PersonaSwitcher
+            personas={personas}
+            activePersonaId={activePersonaId}
+            onSwitch={onSwitchPersona}
+            onOpenLibrary={onOpenLibrary}
+            onOpenCreate={onOpenCreate}
+          />
         </div>
 
         {/* Navigation Links */}

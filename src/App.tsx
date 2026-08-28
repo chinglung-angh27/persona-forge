@@ -75,6 +75,13 @@ export default function App() {
     setPersonas((prev) => updateActivePersonaIn(prev, activePersonaId, partial));
   };
 
+  // Task 7: switch active persona — bumps lastActiveAt on the newly selected one.
+  // Task 8 will own the create/library flows.
+  const handleSwitchPersona = (id: string) => {
+    setActivePersonaId(id);
+    setPersonas((prev) => updateActivePersonaIn(prev, id, { lastActiveAt: new Date().toISOString() }));
+  };
+
   // ponytail: read-only aliases for the views Task 5/6 will rewire to activePersona.*.
   // Handlers below mutate the active persona via updateActivePersona — no setX shims.
   // ponytail: aliases removed — views now read activePersona.* directly.
@@ -267,6 +274,11 @@ export default function App() {
         personaName={activePersona.name}
         onLogout={handleLogout}
         onOpenMore={() => setMoreOpen(true)}
+        personas={personas}
+        activePersonaId={activePersonaId}
+        onSwitchPersona={handleSwitchPersona}
+        onOpenLibrary={() => setCurrentView('library')}
+        onOpenCreate={() => setCurrentView('persona-new')}
       />
 
       {/* Main Content Area */}

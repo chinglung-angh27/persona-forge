@@ -1,6 +1,6 @@
 import React from 'react';
 import { ViewMode } from '../types';
-import { UserCheck, Bookmark, TrendingUp, Settings, X } from 'lucide-react';
+import { UserCheck, Bookmark, TrendingUp, Settings, X, Library } from 'lucide-react';
 
 interface MoreMenuProps {
   open: boolean;
@@ -9,6 +9,7 @@ interface MoreMenuProps {
 }
 
 const ENTRIES: { id: ViewMode; label: string; hint: string; icon: React.ReactNode }[] = [
+  { id: 'library',         label: 'Persona Library', hint: 'Switch, create, manage personas',       icon: <Library className="w-5 h-5" /> },
   { id: 'more-persona',    label: 'My Persona',     hint: 'Profile, archetype, blended references', icon: <UserCheck className="w-5 h-5" /> },
   { id: 'more-references', label: 'Reference Library', hint: 'Browse and apply archetypes',        icon: <Bookmark className="w-5 h-5" /> },
   { id: 'more-evolution',  label: 'Evolution Log',  hint: 'Full history of breakthroughs',         icon: <TrendingUp className="w-5 h-5" /> },
