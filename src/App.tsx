@@ -3,7 +3,6 @@ import {
   ViewMode,
   UserSession,
   Persona,
-  Trait,
   ReferenceItem,
   DailyMission,
   HabitItem,
@@ -13,16 +12,13 @@ import {
 import {
   INITIAL_SESSION,
   INITIAL_TRAITS,
-  INITIAL_DAILY_MISSIONS,
-  INITIAL_HABITS,
-  INITIAL_REFLECTIONS,
-  INITIAL_EVOLUTION_ITEMS,
   INITIAL_REFERENCES,
   INITIAL_SIMULATOR_SCENARIOS,
 } from './data/initialData';
 import {
   loadPersonas, loadActivePersonaId, savePersonas, saveActivePersonaId,
   updateActivePersonaIn,
+  seedPersona,
 } from './lib/personaStore';
 import { Navigation } from './components/Navigation';
 import { LoginView } from './components/LoginView';
@@ -79,51 +75,14 @@ export default function App() {
     setPersonas((prev) => updateActivePersonaIn(prev, activePersonaId, partial));
   };
 
-  // ponytail: short shims for the handlers Task 3 must leave alone.
-  // Task 4 will delete these and route everything through updateActivePersona.
+  // ponytail: read-only aliases for the views Task 5/6 will rewire to activePersona.*.
+  // Handlers below mutate the active persona via updateActivePersona — no setX shims.
   const traits = activePersona?.traits ?? [];
   const blendedReferences = activePersona?.blendedReferenceIds ?? [];
   const dailyMissions = activePersona?.dailyMissions ?? [];
   const habits = activePersona?.habits ?? [];
   const reflections = activePersona?.reflections ?? [];
   const evolutionItems = activePersona?.evolutionItems ?? [];
-
-  const setTraits: React.Dispatch<React.SetStateAction<Trait[]>> = (action) => {
-    updateActivePersona((p) => ({
-      ...p,
-      traits: typeof action === 'function' ? action(p.traits) : action,
-    }));
-  };
-  const setBlendedReferences: React.Dispatch<React.SetStateAction<string[]>> = (action) => {
-    updateActivePersona((p) => ({
-      ...p,
-      blendedReferenceIds: typeof action === 'function' ? action(p.blendedReferenceIds) : action,
-    }));
-  };
-  const setDailyMissions: React.Dispatch<React.SetStateAction<DailyMission[]>> = (action) => {
-    updateActivePersona((p) => ({
-      ...p,
-      dailyMissions: typeof action === 'function' ? action(p.dailyMissions) : action,
-    }));
-  };
-  const setHabits: React.Dispatch<React.SetStateAction<HabitItem[]>> = (action) => {
-    updateActivePersona((p) => ({
-      ...p,
-      habits: typeof action === 'function' ? action(p.habits) : action,
-    }));
-  };
-  const setReflections: React.Dispatch<React.SetStateAction<ReflectionEntry[]>> = (action) => {
-    updateActivePersona((p) => ({
-      ...p,
-      reflections: typeof action === 'function' ? action(p.reflections) : action,
-    }));
-  };
-  const setEvolutionItems: React.Dispatch<React.SetStateAction<EvolutionItem[]>> = (action) => {
-    updateActivePersona((p) => ({
-      ...p,
-      evolutionItems: typeof action === 'function' ? action(p.evolutionItems) : action,
-    }));
-  };
 
   // Derive consistencyScore from real activity (no hardcoded value).
   // Weighted: missions 35%, habits 35%, reflections 15%, sim average 15%.
@@ -169,15 +128,22 @@ export default function App() {
     saveActivePersonaId(activePersonaId);
   }, [activePersonaId]);
 
-  // Handlers
+  // Handlers — every persona mutation funnels through updateActivePersona.
   const handleLogin = (profile: { email: string; personaName: string; archetype: string }) => {
-    const updated = {
+    const updated: UserSession = {
       ...session,
       ...profile,
-      isAuthenticated: true
+      isAuthenticated: true,
     };
     setSession(updated);
-    setCurrentView('dashboard');
+    setPersonas((prev) => {
+      if (prev.length > 0) return prev;
+      // ponytail: first login seeds a persona using the form's chosen name/archetype.
+      const p = seedPersona(profile.personaName, profile.archetype);
+      setActivePersonaId(p.id);
+      return [p];
+    });
+    setCurrentView('today');
   };
 
   const handleLogout = () => {
@@ -189,106 +155,102 @@ export default function App() {
     setSession((prev) => ({ ...prev, ...updated }));
   };
 
+  // ponytail: purge nukes storage and reseeds via personaStore.seedPersona — no flat state to clear.
   const handlePurgeData = () => {
     localStorage.clear();
-    setSession(INITIAL_SESSION);
-    setTraits(INITIAL_TRAITS);
-    setBlendedReferences([]);
-    setDailyMissions(INITIAL_DAILY_MISSIONS);
-    setHabits(INITIAL_HABITS);
-    setReflections(INITIAL_REFLECTIONS);
-    setEvolutionItems(INITIAL_EVOLUTION_ITEMS);
-    setCurrentView('dashboard');
+    const p = seedPersona();
+    setPersonas([p]);
+    setActivePersonaId(p.id);
+    setSession({ ...INITIAL_SESSION, activePersonaId: p.id, isAuthenticated: false, email: '' });
+    setCurrentView('login');
   };
 
   const handleToggleMission = (id: string) => {
-    setDailyMissions((prev) =>
-      prev.map((m) =>
-        m.id === id
-          ? { ...m, status: m.status === 'completed' ? 'pending' : 'completed' }
-          : m
-      )
-    );
+    updateActivePersona((p) => ({
+      ...p,
+      dailyMissions: p.dailyMissions.map((m) =>
+        m.id === id ? { ...m, status: m.status === 'completed' ? 'pending' : 'completed' } : m
+      ),
+    }));
   };
 
   const handleAddMission = (mission: DailyMission) => {
-    setDailyMissions((prev) => [mission, ...prev]);
+    updateActivePersona((p) => ({ ...p, dailyMissions: [mission, ...p.dailyMissions] }));
   };
 
   const handleApplyReference = (ref: ReferenceItem) => {
-    // Add reference to blended list
-    if (!blendedReferences.includes(ref.id)) {
-      setBlendedReferences((prev) => [...prev, ref.id]);
-    }
-
-    // Apply trait modifiers to current traits
-    setTraits((prevTraits) => {
-      return prevTraits.map((t) => {
+    updateActivePersona((p) => {
+      const blended = p.blendedReferenceIds.includes(ref.id)
+        ? p.blendedReferenceIds
+        : [...p.blendedReferenceIds, ref.id];
+      const traits = p.traits.map((t) => {
         const mod = ref.dnaModifiers[t.name];
-        if (mod) {
-          const newVal = Math.min(100, Math.max(0, t.value + mod));
-          return { ...t, value: newVal };
-        }
-        return t;
+        return mod ? { ...t, value: Math.min(100, Math.max(0, t.value + mod)) } : t;
       });
+      const newEvolution: EvolutionItem = {
+        id: `evo-${Date.now()}`,
+        title: `Integrated Archetype: ${ref.name}`,
+        description: `Synthesized mental models from ${ref.name} (${ref.title}). Calibrated psychological baseline weights.`,
+        icon: 'trending_up',
+        timestamp: 'Just now',
+        category: 'Archetype Fusion',
+        changeValue: '+4% Alignment',
+      };
+      return { ...p, blendedReferenceIds: blended, traits, evolutionItems: [newEvolution, ...p.evolutionItems] };
     });
-
-    // Log an evolution entry
-    const newEvolution: EvolutionItem = {
-      id: `evo-${Date.now()}`,
-      title: `Integrated Archetype: ${ref.name}`,
-      description: `Synthesized mental models from ${ref.name} (${ref.title}). Calibrated psychological baseline weights.`,
-      icon: 'trending_up',
-      timestamp: 'Just now',
-      category: 'Archetype Fusion',
-      changeValue: '+4% Alignment'
-    };
-    setEvolutionItems((prev) => [newEvolution, ...prev]);
   };
 
   const handleAddEvolution = (item: Omit<EvolutionItem, 'id' | 'timestamp'>) => {
     const newItem: EvolutionItem = {
       ...item,
       id: `evo-${Date.now()}`,
-      timestamp: 'Just now'
+      timestamp: 'Just now',
     };
-    setEvolutionItems((prev) => [newItem, ...prev]);
+    updateActivePersona((p) => ({ ...p, evolutionItems: [newItem, ...p.evolutionItems] }));
   };
 
   const handleToggleHabitDay = (habitId: string, dayIndex: number) => {
-    setHabits((prev) =>
-      prev.map((h) => {
-        if (h.id === habitId) {
-          const newDays = [...h.days];
-          newDays[dayIndex] = !newDays[dayIndex];
-          const newStreak = newDays[dayIndex] ? h.streak + 1 : Math.max(0, h.streak - 1);
-          return { ...h, days: newDays, streak: newStreak };
-        }
-        return h;
-      })
-    );
+    updateActivePersona((p) => ({
+      ...p,
+      habits: p.habits.map((h) => {
+        if (h.id !== habitId) return h;
+        const days = [...h.days];
+        days[dayIndex] = !days[dayIndex];
+        const streak = days[dayIndex] ? h.streak + 1 : Math.max(0, h.streak - 1);
+        return { ...h, days, streak };
+      }),
+    }));
   };
 
   const handleAddHabit = (habit: HabitItem) => {
-    setHabits((prev) => [...prev, habit]);
+    updateActivePersona((p) => ({ ...p, habits: [...p.habits, habit] }));
   };
 
   const handleAddReflection = (entry: ReflectionEntry) => {
-    setReflections((prev) => [entry, ...prev]);
+    updateActivePersona((p) => ({ ...p, reflections: [entry, ...p.reflections] }));
   };
 
   const handleRecordSimulationResult = (scenarioId: string, score: number) => {
-    // Dynamically adjust consistency score or add evolution log
-    const newEvolution: EvolutionItem = {
-      id: `evo-sim-${Date.now()}`,
-      title: `Crucible Test Completed`,
-      description: `Executed tactical response in simulation. Achieved ${score}% alignment with core archetype.`,
-      icon: 'balance',
-      timestamp: 'Just now',
-      category: 'Simulation Audit',
-      changeValue: `${score}% Match`
-    };
-    setEvolutionItems((prev) => [newEvolution, ...prev]);
+    updateActivePersona((p) => {
+      const newEvolution: EvolutionItem = {
+        id: `evo-sim-${Date.now()}`,
+        title: 'Crucible Test Completed',
+        description: `Executed tactical response in simulation. Achieved ${score}% alignment with core archetype.`,
+        icon: 'balance',
+        timestamp: 'Just now',
+        category: 'Simulation Audit',
+        changeValue: `${score}% Match`,
+      };
+      return {
+        ...p,
+        evolutionItems: [newEvolution, ...p.evolutionItems],
+        simulatorResults: [...p.simulatorResults, { scenarioId, score, ts: new Date().toISOString() }],
+      };
+    });
+  };
+
+  const handleResetTraits = () => {
+    updateActivePersona((p) => ({ ...p, traits: INITIAL_TRAITS.map((t) => ({ ...t })) }));
   };
 
   // ponytail: track the More sheet as overlay state, not a route.
@@ -331,7 +293,7 @@ export default function App() {
         {currentView === 'dna' && (
           <DNAEditorView
             traits={traits}
-            onUpdateTraits={setTraits}
+            onUpdateTraits={(t) => updateActivePersona({ traits: t })}
             onSaveVersion={() => {
               const newEvolution: EvolutionItem = {
                 id: `evo-dna-${Date.now()}`,
@@ -342,9 +304,9 @@ export default function App() {
                 category: 'DNA Recalibration',
                 changeValue: 'Version Saved'
               };
-              setEvolutionItems((prev) => [newEvolution, ...prev]);
+              updateActivePersona((p) => ({ ...p, evolutionItems: [newEvolution, ...p.evolutionItems] }));
             }}
-            onResetTraits={() => setTraits(INITIAL_TRAITS)}
+            onResetTraits={handleResetTraits}
           />
         )}
 
