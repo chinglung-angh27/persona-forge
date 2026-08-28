@@ -77,12 +77,7 @@ export default function App() {
 
   // ponytail: read-only aliases for the views Task 5/6 will rewire to activePersona.*.
   // Handlers below mutate the active persona via updateActivePersona — no setX shims.
-  const traits = activePersona?.traits ?? [];
-  const blendedReferences = activePersona?.blendedReferenceIds ?? [];
-  const dailyMissions = activePersona?.dailyMissions ?? [];
-  const habits = activePersona?.habits ?? [];
-  const reflections = activePersona?.reflections ?? [];
-  const evolutionItems = activePersona?.evolutionItems ?? [];
+  // ponytail: aliases removed — views now read activePersona.* directly.
 
   // Derive consistencyScore from real activity (no hardcoded value).
   // Weighted: missions 35%, habits 35%, reflections 15%, sim average 15%.
@@ -269,7 +264,7 @@ export default function App() {
         currentView={currentView}
         onNavigate={setCurrentView}
         userEmail={session.email}
-        personaName={session.personaName}
+        personaName={activePersona.name}
         onLogout={handleLogout}
         onOpenMore={() => setMoreOpen(true)}
       />
@@ -329,10 +324,10 @@ export default function App() {
 
         {currentView === 'more-persona' && (
           <MyPersonaView
-            personaName={session.personaName}
-            archetype={session.archetype}
-            traits={traits}
-            blendedReferences={blendedReferences}
+            personaName={activePersona.name}
+            archetype={activePersona.archetype}
+            traits={activePersona.traits}
+            blendedReferences={activePersona.blendedReferenceIds}
             allReferences={references}
             consistencyScore={consistencyScore}
             onNavigate={setCurrentView}
@@ -342,16 +337,16 @@ export default function App() {
         {currentView === 'more-references' && (
           <ReferenceLibraryView
             references={references}
-            activeTraits={traits}
+            activeTraits={activePersona.traits}
             onApplyReference={handleApplyReference}
-            blendedReferences={blendedReferences}
+            blendedReferences={activePersona.blendedReferenceIds}
           />
         )}
 
         {currentView === 'more-evolution' && (
           <EvolutionView
-            evolutionItems={evolutionItems}
-            traits={traits}
+            evolutionItems={activePersona.evolutionItems}
+            traits={activePersona.traits}
             consistencyScore={consistencyScore}
           />
         )}
