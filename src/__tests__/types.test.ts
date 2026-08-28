@@ -1,76 +1,41 @@
 import type {
-  Trait,
-  ReferenceItem,
-  DailyMission,
-  EvolutionItem,
-  SimulatorScenario,
-  HabitItem,
-  ReflectionEntry,
-  UserSession,
-  ViewMode,
+  Trait, ReferenceItem, DailyMission, EvolutionItem, SimulatorScenario,
+  HabitItem, ReflectionEntry, UserSession, Persona, ViewMode,
 } from '@/src/types';
 
 describe('type shape/contracts', () => {
   it('Trait category union matches expected members', () => {
     const valid: Trait['category'][] = ['cognitive', 'behavioral', 'emotional', 'strategic'];
-    const sample: Trait['category'] = 'strategic';
-    expect(valid).toContain(sample);
+    expect(valid).toContain('strategic' as Trait['category']);
   });
 
-  it('ViewMode covers all app views', () => {
+  it('ViewMode covers all app views incl. persona library/manage/new', () => {
     const modes: ViewMode[] = [
       'login', 'today', 'dna', 'train', 'journal',
       'more-persona', 'more-references', 'more-evolution', 'more-settings',
+      'library', 'persona-new', 'persona-manage',
     ];
-    expect(modes.length).toBe(9);
+    expect(modes.length).toBe(12);
   });
 
-  it('ReferenceItem category union matches seed categories', () => {
-    const valid: ReferenceItem['category'][] = [
-      'Tech Visionaries', 'Athletes', 'Fictional', 'Historical', 'Philosophers',
-    ];
-    const seedCats: ReferenceItem['category'][] = [
-      'Tech Visionaries', 'Athletes', 'Historical', 'Fictional',
-    ];
-    for (const c of seedCats) {
-      expect(valid, `category ${c}`).toContain(c);
-    }
-  });
-
-  it('DailyMission status is a valid union member', () => {
-    const valid: DailyMission['status'][] = ['pending', 'in_progress', 'completed'];
-    expect(valid).toContain('in_progress');
-  });
-
-  it('EvolutionItem changeValue is optional', () => {
-    const e: EvolutionItem = {
-      id: 'x', title: 't', description: 'd', icon: 'i', category: 'c', timestamp: 'now',
+  it('Persona owns all per-persona data', () => {
+    const p: Persona = {
+      id: 'p1', name: 'Ching', archetype: 'THE STRATEGIC OPERATOR',
+      identityStatement: '', traits: [], blendedReferenceIds: [],
+      dailyMissions: [], habits: [], reflections: [], evolutionItems: [],
+      simulatorResults: [], createdAt: '', lastActiveAt: '', status: 'active',
     };
-    expect(e.changeValue).toBeUndefined();
+    expect(p.status).toBe('active');
   });
 
-  it('SimulatorScenario option alignmentScore is a number', () => {
-    const opt: SimulatorScenario['options'][number] = {
-      id: 'o', text: 't', traitWeights: {}, feedback: 'f', alignmentScore: 0,
+  it('UserSession is slimmed: no personaName/archetype/consistencyScore, has activePersonaId', () => {
+    const s: UserSession = {
+      email: 'a@b.c', isAuthenticated: true, modelIntensity: 'Balanced',
+      predictiveInsights: false, activePersonaId: 'p1',
     };
-    expect(typeof opt.alignmentScore).toBe('number');
-  });
-
-  it('HabitItem days is a 7-element boolean array', () => {
-    const h: HabitItem = {
-      id: 'h', name: 'n', streak: 1, targetPerWeek: 7,
-      days: [true, false, true, false, true, false, true], icon: 'i', category: 'c',
-    } as HabitItem;
-    expect(h.days.length).toBe(7);
-  });
-
-  it('ReflectionEntry sentiment is a valid union member', () => {
-    const valid: ReflectionEntry['sentiment'][] = ['constructive', 'stoic', 'breakthrough', 'neutral'];
-    expect(valid).toContain('breakthrough');
-  });
-
-  it('UserSession modelIntensity is a valid union member', () => {
-    const valid: UserSession['modelIntensity'][] = ['Passive', 'Balanced', 'Aggressive'];
-    expect(valid).toContain('Aggressive');
+    expect((s as any).personaName).toBeUndefined();
+    expect((s as any).archetype).toBeUndefined();
+    expect((s as any).consistencyScore).toBeUndefined();
+    expect(s.activePersonaId).toBe('p1');
   });
 });

@@ -1,23 +1,38 @@
 // Primary nav surface: 4 tabs + More menu sub-routes for demoted features.
 export type ViewMode =
-  | 'login'
-  | 'today'
-  | 'dna'
-  | 'train'
-  | 'journal'
-  | 'more-persona'
-  | 'more-references'
-  | 'more-evolution'
-  | 'more-settings';
+  | 'login' | 'today' | 'dna' | 'train' | 'journal'
+  | 'more-persona' | 'more-references' | 'more-evolution' | 'more-settings'
+  | 'library' | 'persona-new' | 'persona-manage';
 
 export interface UserSession {
   email: string;
-  personaName: string;
-  archetype: string;
   isAuthenticated: boolean;
-  consistencyScore: number;
   modelIntensity: 'Passive' | 'Balanced' | 'Aggressive';
   predictiveInsights: boolean;
+  activePersonaId: string;
+}
+
+export interface SimulatorResult {
+  scenarioId: string;
+  score: number;
+  ts: string;
+}
+
+export interface Persona {
+  id: string;
+  name: string;
+  archetype: string;
+  identityStatement: string;
+  traits: Trait[];
+  blendedReferenceIds: string[];
+  dailyMissions: DailyMission[];
+  habits: HabitItem[];
+  reflections: ReflectionEntry[];
+  evolutionItems: EvolutionItem[];
+  simulatorResults: SimulatorResult[];
+  createdAt: string;
+  lastActiveAt: string;
+  status: 'draft' | 'active' | 'archived';
 }
 
 export interface Trait {

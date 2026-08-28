@@ -1,13 +1,11 @@
 import { Trait, ReferenceItem, DailyMission, EvolutionItem, SimulatorScenario, HabitItem, ReflectionEntry, UserSession } from '../types';
 
 export const INITIAL_SESSION: UserSession = {
-  personaName: 'Ching',
   email: 'x.architect@forge.ai',
-  archetype: 'THE STRATEGIC OPERATOR',
-  consistencyScore: 82,
   modelIntensity: 'Aggressive',
   predictiveInsights: true,
-  isAuthenticated: true
+  isAuthenticated: true,
+  activePersonaId: ''
 };
 
 export const INITIAL_TRAITS: Trait[] = [
