@@ -1,24 +1,29 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  ViewMode, 
-  UserSession, 
-  Trait, 
-  ReferenceItem, 
-  DailyMission, 
-  HabitItem, 
-  ReflectionEntry, 
-  EvolutionItem 
+import {
+  ViewMode,
+  UserSession,
+  Persona,
+  Trait,
+  ReferenceItem,
+  DailyMission,
+  HabitItem,
+  ReflectionEntry,
+  EvolutionItem,
 } from './types';
 import {
   INITIAL_SESSION,
   INITIAL_TRAITS,
-  INITIAL_REFERENCES,
   INITIAL_DAILY_MISSIONS,
   INITIAL_HABITS,
   INITIAL_REFLECTIONS,
   INITIAL_EVOLUTION_ITEMS,
-  INITIAL_SIMULATOR_SCENARIOS
+  INITIAL_REFERENCES,
+  INITIAL_SIMULATOR_SCENARIOS,
 } from './data/initialData';
+import {
+  loadPersonas, loadActivePersonaId, savePersonas, saveActivePersonaId,
+  updateActivePersonaIn,
+} from './lib/personaStore';
 import { Navigation } from './components/Navigation';
 import { LoginView } from './components/LoginView';
 import { TodayView } from './components/TodayView';
@@ -40,57 +45,94 @@ export default function App() {
       // ponytail: a saved session with an email IS the local profile; don't force re-login.
       return { ...parsed, isAuthenticated: Boolean(parsed.email) };
     }
-    return INITIAL_SESSION;
+    return { ...INITIAL_SESSION, personaName: undefined, archetype: undefined, consistencyScore: undefined } as unknown as UserSession;
   });
+
+  // Personas State
+  const [personas, setPersonas] = useState<Persona[]>(() => loadPersonas());
+  const [activePersonaId, setActivePersonaId] = useState<string>(() =>
+    loadActivePersonaId(loadPersonas())
+  );
 
   // Current View
   const [currentView, setCurrentView] = useState<ViewMode>(() => {
     return session.isAuthenticated ? 'today' : 'login';
   });
 
-  // Traits State
-  const [traits, setTraits] = useState<Trait[]>(() => {
-    const saved = localStorage.getItem('pf_traits');
-    return saved ? JSON.parse(saved) : INITIAL_TRAITS;
-  });
-
-  // Reference Library State
+  // Reference Library State (global, not per-persona)
   const [references] = useState<ReferenceItem[]>(INITIAL_REFERENCES);
-  const [blendedReferences, setBlendedReferences] = useState<string[]>(() => {
-    const saved = localStorage.getItem('pf_blended_refs');
-    return saved ? JSON.parse(saved) : ['steve-jobs', 'marcus-aurelius'];
-  });
 
-  // Daily Missions State
-  const [dailyMissions, setDailyMissions] = useState<DailyMission[]>(() => {
-    const saved = localStorage.getItem('pf_missions');
-    return saved ? JSON.parse(saved) : INITIAL_DAILY_MISSIONS;
-  });
-
-  // Habits State
-  const [habits, setHabits] = useState<HabitItem[]>(() => {
-    const saved = localStorage.getItem('pf_habits');
-    return saved ? JSON.parse(saved) : INITIAL_HABITS;
-  });
-
-  // Reflections State
-  const [reflections, setReflections] = useState<ReflectionEntry[]>(() => {
-    const saved = localStorage.getItem('pf_reflections');
-    return saved ? JSON.parse(saved) : INITIAL_REFLECTIONS;
-  });
-
-  // Evolution Items State
-  const [evolutionItems, setEvolutionItems] = useState<EvolutionItem[]>(() => {
-    const saved = localStorage.getItem('pf_evolution');
-    return saved ? JSON.parse(saved) : INITIAL_EVOLUTION_ITEMS;
-  });
-
-  // Scenarios State
+  // Scenarios State (constant, not per-persona)
   const [scenarios] = useState(INITIAL_SIMULATOR_SCENARIOS);
+
+  // ponytail: derive active persona from personas + activePersonaId.
+  const activePersona = useMemo(
+    () => personas.find((p) => p.id === activePersonaId) ?? personas[0],
+    [personas, activePersonaId]
+  );
+
+  // ponytail: funnel all active-persona updates through one helper.
+  // Task 4 will rewrite the handlers to use this.
+  const updateActivePersona = (
+    partial: Partial<Persona> | ((p: Persona) => Persona)
+  ) => {
+    setPersonas((prev) => updateActivePersonaIn(prev, activePersonaId, partial));
+  };
+
+  // ponytail: short shims for the handlers Task 3 must leave alone.
+  // Task 4 will delete these and route everything through updateActivePersona.
+  const traits = activePersona?.traits ?? [];
+  const blendedReferences = activePersona?.blendedReferenceIds ?? [];
+  const dailyMissions = activePersona?.dailyMissions ?? [];
+  const habits = activePersona?.habits ?? [];
+  const reflections = activePersona?.reflections ?? [];
+  const evolutionItems = activePersona?.evolutionItems ?? [];
+
+  const setTraits: React.Dispatch<React.SetStateAction<Trait[]>> = (action) => {
+    updateActivePersona((p) => ({
+      ...p,
+      traits: typeof action === 'function' ? action(p.traits) : action,
+    }));
+  };
+  const setBlendedReferences: React.Dispatch<React.SetStateAction<string[]>> = (action) => {
+    updateActivePersona((p) => ({
+      ...p,
+      blendedReferenceIds: typeof action === 'function' ? action(p.blendedReferenceIds) : action,
+    }));
+  };
+  const setDailyMissions: React.Dispatch<React.SetStateAction<DailyMission[]>> = (action) => {
+    updateActivePersona((p) => ({
+      ...p,
+      dailyMissions: typeof action === 'function' ? action(p.dailyMissions) : action,
+    }));
+  };
+  const setHabits: React.Dispatch<React.SetStateAction<HabitItem[]>> = (action) => {
+    updateActivePersona((p) => ({
+      ...p,
+      habits: typeof action === 'function' ? action(p.habits) : action,
+    }));
+  };
+  const setReflections: React.Dispatch<React.SetStateAction<ReflectionEntry[]>> = (action) => {
+    updateActivePersona((p) => ({
+      ...p,
+      reflections: typeof action === 'function' ? action(p.reflections) : action,
+    }));
+  };
+  const setEvolutionItems: React.Dispatch<React.SetStateAction<EvolutionItem[]>> = (action) => {
+    updateActivePersona((p) => ({
+      ...p,
+      evolutionItems: typeof action === 'function' ? action(p.evolutionItems) : action,
+    }));
+  };
 
   // Derive consistencyScore from real activity (no hardcoded value).
   // Weighted: missions 35%, habits 35%, reflections 15%, sim average 15%.
   const consistencyScore = useMemo(() => {
+    const dailyMissions = activePersona?.dailyMissions ?? [];
+    const habits = activePersona?.habits ?? [];
+    const reflections = activePersona?.reflections ?? [];
+    const evolutionItems = activePersona?.evolutionItems ?? [];
+
     const missionDone = dailyMissions.filter((m) => m.status === 'completed').length;
     const missionPct = dailyMissions.length ? (missionDone / dailyMissions.length) * 100 : 0;
 
@@ -102,7 +144,7 @@ export default function App() {
 
     const simScores = evolutionItems
       .filter((e) => e.category === 'Simulation Audit')
-      .map((e) => parseInt(e.changeValue) || 0)
+      .map((e) => parseInt(e.changeValue ?? '0', 10) || 0)
       .filter((n) => n > 0);
     const simPct = simScores.length
       ? simScores.reduce((a, b) => a + b, 0) / simScores.length
@@ -112,7 +154,7 @@ export default function App() {
       missionPct * 0.35 + habitPct * 0.35 + reflectionPct * 0.15 + simPct * 0.15
     );
     return Math.max(0, Math.min(100, score));
-  }, [dailyMissions, habits, reflections, evolutionItems]);
+  }, [activePersona]);
 
   // Sync to LocalStorage
   useEffect(() => {
@@ -120,28 +162,12 @@ export default function App() {
   }, [session]);
 
   useEffect(() => {
-    localStorage.setItem('pf_traits', JSON.stringify(traits));
-  }, [traits]);
+    savePersonas(personas);
+  }, [personas]);
 
   useEffect(() => {
-    localStorage.setItem('pf_blended_refs', JSON.stringify(blendedReferences));
-  }, [blendedReferences]);
-
-  useEffect(() => {
-    localStorage.setItem('pf_missions', JSON.stringify(dailyMissions));
-  }, [dailyMissions]);
-
-  useEffect(() => {
-    localStorage.setItem('pf_habits', JSON.stringify(habits));
-  }, [habits]);
-
-  useEffect(() => {
-    localStorage.setItem('pf_reflections', JSON.stringify(reflections));
-  }, [reflections]);
-
-  useEffect(() => {
-    localStorage.setItem('pf_evolution', JSON.stringify(evolutionItems));
-  }, [evolutionItems]);
+    saveActivePersonaId(activePersonaId);
+  }, [activePersonaId]);
 
   // Handlers
   const handleLogin = (profile: { email: string; personaName: string; archetype: string }) => {
