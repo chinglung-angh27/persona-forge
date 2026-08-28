@@ -279,11 +279,12 @@ export default function App() {
         <div key={currentView} className="animate-view-in">
         {currentView === 'today' && (
           <TodayView
-            userName={session.personaName || 'Ching'}
-            personaArchetype={session.archetype || 'THE STRATEGIC OPERATOR'}
+            userName={activePersona.name}
+            personaArchetype={activePersona.archetype}
+            identityStatement={activePersona.identityStatement}
             consistencyScore={consistencyScore}
-            dailyMissions={dailyMissions}
-            evolutionItems={evolutionItems}
+            dailyMissions={activePersona.dailyMissions}
+            evolutionItems={activePersona.evolutionItems}
             predictiveInsights={session.predictiveInsights}
             onNavigate={setCurrentView}
             onToggleMission={handleToggleMission}
@@ -292,20 +293,13 @@ export default function App() {
 
         {currentView === 'dna' && (
           <DNAEditorView
-            traits={traits}
-            onUpdateTraits={(t) => updateActivePersona({ traits: t })}
-            onSaveVersion={() => {
-              const newEvolution: EvolutionItem = {
-                id: `evo-dna-${Date.now()}`,
-                title: 'DNA Matrix Recalibrated',
-                description: 'Updated psychological weightings across discipline, composure, and ambition baselines.',
-                icon: 'balance',
-                timestamp: 'Just now',
-                category: 'DNA Recalibration',
-                changeValue: 'Version Saved'
-              };
-              updateActivePersona((p) => ({ ...p, evolutionItems: [newEvolution, ...p.evolutionItems] }));
-            }}
+            traits={activePersona.traits}
+            onUpdateTraits={(traits) => updateActivePersona({ traits })}
+            onSaveVersion={handleAddEvolution.bind(null, {
+              title: 'DNA Matrix Recalibrated',
+              description: 'Updated psychological weightings across discipline, composure, and ambition baselines.',
+              icon: 'balance', category: 'DNA Recalibration', changeValue: 'Version Saved',
+            } as Omit<EvolutionItem, 'id' | 'timestamp'>)}
             onResetTraits={handleResetTraits}
           />
         )}
@@ -313,9 +307,9 @@ export default function App() {
         {currentView === 'train' && (
           <TrainView
             scenarios={scenarios}
-            activeTraits={traits}
+            activeTraits={activePersona.traits}
             references={references}
-            blendedReferences={blendedReferences}
+            blendedReferences={activePersona.blendedReferenceIds}
             onRecordSimulationResult={handleRecordSimulationResult}
             onApplyReference={handleApplyReference}
           />
@@ -323,12 +317,12 @@ export default function App() {
 
         {currentView === 'journal' && (
           <JournalView
-            habits={habits}
+            habits={activePersona.habits}
             onToggleHabitDay={handleToggleHabitDay}
             onAddHabit={handleAddHabit}
-            reflections={reflections}
+            reflections={activePersona.reflections}
             onAddReflection={handleAddReflection}
-            evolutionItems={evolutionItems}
+            evolutionItems={activePersona.evolutionItems}
             onAddEvolution={handleAddEvolution}
           />
         )}

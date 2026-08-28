@@ -14,6 +14,7 @@ import {
 interface TodayViewProps {
   userName: string;
   personaArchetype: string;
+  identityStatement?: string;
   consistencyScore: number;
   dailyMissions: DailyMission[];
   evolutionItems: EvolutionItem[];
@@ -25,6 +26,7 @@ interface TodayViewProps {
 export const TodayView: React.FC<TodayViewProps> = ({
   userName,
   personaArchetype,
+  identityStatement,
   consistencyScore,
   dailyMissions,
   evolutionItems,
@@ -72,6 +74,11 @@ export const TodayView: React.FC<TodayViewProps> = ({
         <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-[#e5e2e1] uppercase font-bold tracking-tight">
           {personaArchetype || 'THE STRATEGIC OPERATOR'}
         </h1>
+        {identityStatement ? (
+          <p className="font-body text-base md:text-lg text-[#8e9192] mt-3 max-w-2xl leading-relaxed italic">
+            “{identityStatement}”
+          </p>
+        ) : null}
       </header>
 
       {/* Top row: today's mission + consistency ring */}
