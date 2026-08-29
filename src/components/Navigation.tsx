@@ -8,11 +8,7 @@ import {
   Bell,
   LogOut,
   Sparkles,
-  MoreHorizontal,
-  UserCheck,
-  Bookmark,
-  TrendingUp,
-  Settings
+  MoreHorizontal
 } from 'lucide-react';
 import { PersonaSwitcher } from './PersonaSwitcher';
 

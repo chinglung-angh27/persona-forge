@@ -1,16 +1,12 @@
 import React from 'react';
 import { Trait, ReferenceItem, ViewMode } from '../types';
-import { 
-  UserCheck, 
-  Sparkles, 
-  ShieldCheck, 
-  ArrowRight, 
-  Layers, 
-  Target, 
-  Sliders, 
-  Zap, 
-  Brain,
-  Quote,
+import {
+  ShieldCheck,
+  ArrowRight,
+  Layers,
+  Target,
+  Sliders,
+  Zap,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';

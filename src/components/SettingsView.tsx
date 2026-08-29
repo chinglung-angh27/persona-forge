@@ -1,19 +1,14 @@
 import React, { useState } from 'react';
 import { UserSession } from '../types';
-import { 
-  User, 
-  Mail, 
-  Brain, 
-  Trash2, 
-  Save, 
-  CheckCircle, 
-  Sliders, 
-  Download, 
-  Upload, 
-  AlertTriangle,
-  Sparkles,
-  Shield,
-  Bell
+import {
+  User,
+  Brain,
+  Trash2,
+  Save,
+  CheckCircle,
+  Download,
+  Upload,
+  AlertTriangle
 } from 'lucide-react';
 
 interface SettingsViewProps {
@@ -35,7 +30,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     session.predictiveInsights !== undefined ? session.predictiveInsights : true
   );
   const [tactileSound, setTactileSound] = useState(true);
-  const [dailyDigest, setDailyDigest] = useState(true);
   const [showPurgeConfirm, setShowPurgeConfirm] = useState(false);
   const [saveToast, setSaveToast] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);

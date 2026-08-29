@@ -1,18 +1,13 @@
 import React, { useState } from 'react';
 import { SimulatorScenario, Trait } from '../types';
 import { callGemini, GeminiUnavailableError, isGeminiAvailable } from '../lib/geminiClient';
-import { 
-  Cpu, 
-  Play, 
-  CheckCircle2, 
-  AlertCircle, 
-  Sparkles, 
-  ArrowRight, 
-  RotateCcw, 
-  Send,
-  Zap,
-  Activity,
-  Layers
+import {
+  Cpu,
+  Play,
+  CheckCircle2,
+  AlertCircle,
+  Sparkles,
+  Activity
 } from 'lucide-react';
 
 interface SimulatorViewProps {

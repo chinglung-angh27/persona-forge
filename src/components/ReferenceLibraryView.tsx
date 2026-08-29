@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ReferenceItem, Trait } from '../types';
-import { Search, Plus, Check, Info, Sparkles, Quote, ChevronRight, X } from 'lucide-react';
+import { Search, Plus, Check, Sparkles, Quote, X } from 'lucide-react';
 
 interface ReferenceLibraryViewProps {
   references: ReferenceItem[];

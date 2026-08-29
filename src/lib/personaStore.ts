@@ -2,13 +2,12 @@ import {
   INITIAL_TRAITS, INITIAL_DAILY_MISSIONS, INITIAL_HABITS,
   INITIAL_REFLECTIONS, INITIAL_EVOLUTION_ITEMS,
 } from '../data/initialData';
-import { Persona, Trait } from '../types';
-
-export const PF_DATA_VERSION = 1;
+import { Persona, Trait, ARCHETYPES } from '../types';
 
 const PERSONAS_KEY = 'pf_personas';
 const ACTIVE_KEY = 'pf_activePersonaId';
 const LEGACY_KEYS = ['pf_traits', 'pf_missions', 'pf_habits', 'pf_reflections', 'pf_evolution', 'pf_blended_refs'];
+const DEFAULT_ARCHETYPE = ARCHETYPES[0];
 
 function uid(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -20,7 +19,7 @@ function cloneTraits(): Trait[] {
 
 export function seedPersona(
   name = 'Ching',
-  archetype = 'THE STRATEGIC OPERATOR'
+  archetype = DEFAULT_ARCHETYPE
 ): Persona {
   const now = new Date().toISOString();
   return {
@@ -53,7 +52,7 @@ export function migrateLegacy(): { personas: Persona[]; activeId: string } | nul
   const sessionRaw = localStorage.getItem('pf_session');
   const session = sessionRaw ? JSON.parse(sessionRaw) : {};
   const name: string = session.personaName || 'Ching';
-  const archetype: string = session.archetype || 'THE STRATEGIC OPERATOR';
+  const archetype: string = session.archetype || DEFAULT_ARCHETYPE;
 
   const p = seedPersona(name, archetype);
   p.traits = read('pf_traits', p.traits);

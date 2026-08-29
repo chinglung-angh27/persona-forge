@@ -13,7 +13,7 @@ const _mem = new Map<string, string>();
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Persona } from '@/src/types';
 import {
-  seedPersona, migrateLegacy, updateActivePersonaIn, loadPersonas, PF_DATA_VERSION,
+  seedPersona, migrateLegacy, updateActivePersonaIn, loadPersonas,
 } from '@/src/lib/personaStore';
 
 describe('personaStore', () => {

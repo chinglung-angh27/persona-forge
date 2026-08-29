@@ -1,6 +1,6 @@
 import React from 'react';
 import { EvolutionItem, Trait } from '../types';
-import { TrendingUp, Sparkles, Award, Shield, ArrowUpRight, Zap, Sun, Scale } from 'lucide-react';
+import { TrendingUp, Sparkles, ArrowUpRight, Sun, Scale } from 'lucide-react';
 
 interface EvolutionViewProps {
   evolutionItems: EvolutionItem[];

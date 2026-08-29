@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ViewMode, DailyMission, EvolutionItem } from '../types';
+import { ViewMode, DailyMission, EvolutionItem, ARCHETYPES } from '../types';
 import {
   ArrowRight,
   CheckCircle2,
@@ -72,7 +72,7 @@ export const TodayView: React.FC<TodayViewProps> = ({
           Good morning, {userName.split('@')[0] || 'Ching'}.
         </p>
         <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-[#e5e2e1] uppercase font-bold tracking-tight">
-          {personaArchetype || 'THE STRATEGIC OPERATOR'}
+          {personaArchetype || ARCHETYPES[0]}
         </h1>
         {identityStatement ? (
           <p className="font-body text-base md:text-lg text-[#8e9192] mt-3 max-w-2xl leading-relaxed italic">

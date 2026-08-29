@@ -5,7 +5,6 @@ import {
   EvolutionItem
 } from '../types';
 import {
-  CheckSquare,
   Plus,
   Check,
   Calendar,
