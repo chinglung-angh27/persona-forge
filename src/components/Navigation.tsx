@@ -104,8 +104,8 @@ export const Navigation: React.FC<NavigationProps> = ({
       {/* Desktop Sidebar Navigation */}
       <nav className="hidden md:flex fixed left-0 top-0 h-full w-72 z-50 bg-[#121212] shadow-[6px_0_12px_rgba(0,0,0,0.5)] flex-col gap-3 p-6 overflow-y-auto custom-scrollbar border-r border-[#1e1e1e]">
         {/* Brand Header */}
-        <div 
-          onClick={() => onNavigate('dashboard')} 
+        <div
+          onClick={() => onNavigate('today')}
           className="cursor-pointer mb-6 px-3 pt-2"
         >
           <div className="flex items-center gap-3 mb-2">

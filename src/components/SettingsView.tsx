@@ -27,7 +27,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   onUpdateSession,
   onPurgeData
 }) => {
-  const [personaName, setPersonaName] = useState(session.personaName || 'Architect-X');
   const [email, setEmail] = useState(session.email || 'x.architect@forge.ai');
   const [intensity, setIntensity] = useState<'Passive' | 'Balanced' | 'Aggressive'>(
     session.modelIntensity || 'Aggressive'
@@ -111,7 +110,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const handleSaveChanges = (e: React.FormEvent) => {
     e.preventDefault();
     onUpdateSession({
-      personaName,
       email,
       modelIntensity: intensity,
       predictiveInsights
@@ -152,22 +150,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </h2>
 
           <form onSubmit={handleSaveChanges} className="flex flex-col gap-5 flex-1">
-            <div className="flex flex-col gap-2">
-              <label className="font-mono-code text-xs text-[#8e9192] uppercase tracking-wider pl-1">
-                Persona Name
-              </label>
-              <div className="relative flex items-center">
-                <input
-                  type="text"
-                  required
-                  value={personaName}
-                  onChange={(e) => setPersonaName(e.target.value)}
-                  className="neo-input bg-[#121212] font-body text-base text-[#e5e2e1] p-4 rounded-xl w-full border border-[#1e1e1e] placeholder-[#7e7d7d]"
-                  placeholder="Architect-X"
-                />
-              </div>
-            </div>
-
             <div className="flex flex-col gap-2">
               <label className="font-mono-code text-xs text-[#8e9192] uppercase tracking-wider pl-1">
                 Email Address

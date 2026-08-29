@@ -48,7 +48,7 @@ export default function App() {
       // ponytail: a saved session with an email IS the local profile; don't force re-login.
       return { ...parsed, isAuthenticated: Boolean(parsed.email) };
     }
-    return { ...INITIAL_SESSION, personaName: undefined, archetype: undefined, consistencyScore: undefined } as unknown as UserSession;
+    return INITIAL_SESSION;
   });
 
   // Personas State
@@ -180,23 +180,19 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Reflect active persona in the URL.
+  // Reflect active persona in the URL — but skip if the URL already carries it,
+  // so we never clobber a ?persona= the user opened with (e.g. a shared link).
   useEffect(() => {
     const url = new URL(window.location.href);
+    if (url.searchParams.get('persona') === activePersonaId) return;
     url.searchParams.set('persona', activePersonaId);
     window.history.replaceState({}, '', url.toString());
   }, [activePersonaId]);
 
   // Handlers — every persona mutation funnels through updateActivePersona.
+  // ponytail: loadPersonas() already guarantees ≥1 persona, so login never needs to seed.
   const handleLogin = (email: string) => {
     setSession((prev) => ({ ...prev, email, isAuthenticated: true }));
-    setPersonas((prev) => {
-      if (prev.length > 0) return prev;
-      // ponytail: first login seeds a persona with the default Ching / STRATEGIC OPERATOR.
-      const p = seedPersona();
-      setActivePersonaId(p.id);
-      return [p];
-    });
     setCurrentView('today');
   };
 
