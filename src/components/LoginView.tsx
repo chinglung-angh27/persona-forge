@@ -2,24 +2,15 @@ import React, { useState } from 'react';
 import { LogIn, Sparkles } from 'lucide-react';
 
 interface LoginViewProps {
-  onLogin: (profile: { email: string; personaName: string; archetype: string }) => void;
+  onLogin: (email: string) => void;
 }
 
-const ARCHETYPES = [
-  'THE STRATEGIC OPERATOR',
-  'THE STOIC ARCHITECT',
-  'THE ADAPTIVE PREDATOR',
-  'THE CALCULATED VISIONARY',
-];
-
 export const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
-  const [personaName, setPersonaName] = useState('Ching');
-  const [archetype, setArchetype] = useState(ARCHETYPES[0]);
   const [email, setEmail] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin({ email: email.trim() || 'local@persona.forge', personaName, archetype });
+    onLogin(email.trim() || 'local@persona.forge');
   };
 
   return (
@@ -46,35 +37,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5 mt-8">
-          <div>
-            <label htmlFor="personaName" className="block font-mono-code text-xs text-[#8e9192] uppercase tracking-widest mb-2">
-              Persona Name
-            </label>
-            <input
-              id="personaName"
-              value={personaName}
-              onChange={(e) => setPersonaName(e.target.value)}
-              className="w-full bg-[#1a1a1a] rounded-xl neo-input p-3 text-sm text-[#e5e2e1] border border-[#1e1e1e]"
-              placeholder="Your operative handle"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="archetype" className="block font-mono-code text-xs text-[#8e9192] uppercase tracking-widest mb-2">
-              Target Archetype
-            </label>
-            <select
-              id="archetype"
-              value={archetype}
-              onChange={(e) => setArchetype(e.target.value)}
-              className="w-full bg-[#1a1a1a] rounded-xl neo-input p-3 text-sm text-[#e5e2e1] border border-[#1e1e1e]"
-            >
-              {ARCHETYPES.map((a) => (
-                <option key={a} value={a}>{a}</option>
-              ))}
-            </select>
-          </div>
-
           <div>
             <label htmlFor="email" className="block font-mono-code text-xs text-[#8e9192] uppercase tracking-widest mb-2">
               Backup Email (optional)

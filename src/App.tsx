@@ -170,18 +170,30 @@ export default function App() {
     saveActivePersonaId(activePersonaId);
   }, [activePersonaId]);
 
+  // Restore active persona from ?persona=<id> on load.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pid = params.get('persona');
+    if (pid && personas.some((p) => p.id === pid)) {
+      setActivePersonaId(pid);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Reflect active persona in the URL.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('persona', activePersonaId);
+    window.history.replaceState({}, '', url.toString());
+  }, [activePersonaId]);
+
   // Handlers — every persona mutation funnels through updateActivePersona.
-  const handleLogin = (profile: { email: string; personaName: string; archetype: string }) => {
-    const updated: UserSession = {
-      ...session,
-      ...profile,
-      isAuthenticated: true,
-    };
-    setSession(updated);
+  const handleLogin = (email: string) => {
+    setSession((prev) => ({ ...prev, email, isAuthenticated: true }));
     setPersonas((prev) => {
       if (prev.length > 0) return prev;
-      // ponytail: first login seeds a persona using the form's chosen name/archetype.
-      const p = seedPersona(profile.personaName, profile.archetype);
+      // ponytail: first login seeds a persona with the default Ching / STRATEGIC OPERATOR.
+      const p = seedPersona();
       setActivePersonaId(p.id);
       return [p];
     });
