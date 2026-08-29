@@ -14,6 +14,10 @@ import {
   INITIAL_TRAITS,
   INITIAL_REFERENCES,
   INITIAL_SIMULATOR_SCENARIOS,
+  INITIAL_DAILY_MISSIONS,
+  INITIAL_HABITS,
+  INITIAL_REFLECTIONS,
+  INITIAL_EVOLUTION_ITEMS,
 } from './data/initialData';
 import {
   loadPersonas, loadActivePersonaId, savePersonas, saveActivePersonaId,
@@ -31,6 +35,9 @@ import { SettingsView } from './components/SettingsView';
 import { MyPersonaView } from './components/MyPersonaView';
 import { ReferenceLibraryView } from './components/ReferenceLibraryView';
 import { EvolutionView } from './components/EvolutionView';
+import { PersonaLibraryView } from './components/PersonaLibraryView';
+import { CreatePersonaView } from './components/CreatePersonaView';
+import { PersonaManageView } from './components/PersonaManageView';
 
 export default function App() {
   // Session State
@@ -80,6 +87,39 @@ export default function App() {
   const handleSwitchPersona = (id: string) => {
     setActivePersonaId(id);
     setPersonas((prev) => updateActivePersonaIn(prev, id, { lastActiveAt: new Date().toISOString() }));
+  };
+
+  // Task 8: library/create/manage flows.
+  const handleCreatePersona = (name: string, archetype: string, blendIds: string[]) => {
+    const now = new Date().toISOString();
+    const p: Persona = {
+      id: `persona-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      name, archetype, identityStatement: '',
+      traits: INITIAL_TRAITS.map((t) => ({ ...t })),
+      blendedReferenceIds: blendIds,
+      dailyMissions: INITIAL_DAILY_MISSIONS.map((m) => ({ ...m })),
+      habits: INITIAL_HABITS.map((h) => ({ ...h })),
+      reflections: INITIAL_REFLECTIONS.map((r) => ({ ...r })),
+      evolutionItems: INITIAL_EVOLUTION_ITEMS.map((e) => ({ ...e })),
+      simulatorResults: [],
+      createdAt: now, lastActiveAt: now, status: 'active',
+    };
+    setPersonas((prev) => [...prev, p]);
+    setActivePersonaId(p.id);
+  };
+
+  const handleArchivePersona = (id: string) => {
+    setPersonas((prev) => {
+      const next = prev.map((p) => (p.id === id ? { ...p, status: 'archived' as const } : p));
+      return next;
+    });
+  };
+
+  const handleUpdatePersonaMeta = (
+    id: string,
+    meta: { name: string; archetype: string; identityStatement: string }
+  ) => {
+    setPersonas((prev) => prev.map((p) => (p.id === id ? { ...p, ...meta } : p)));
   };
 
   // ponytail: read-only aliases for the views Task 5/6 will rewire to activePersona.*.
@@ -368,6 +408,32 @@ export default function App() {
             session={session}
             onUpdateSession={handleUpdateSession}
             onPurgeData={handlePurgeData}
+          />
+        )}
+
+        {currentView === 'library' && (
+          <PersonaLibraryView
+            personas={personas}
+            activePersonaId={activePersonaId}
+            onSwitch={handleSwitchPersona}
+            onNavigate={setCurrentView}
+            onArchive={handleArchivePersona}
+          />
+        )}
+
+        {currentView === 'persona-new' && (
+          <CreatePersonaView
+            references={references}
+            onNavigate={setCurrentView}
+            onCreate={handleCreatePersona}
+          />
+        )}
+
+        {currentView === 'persona-manage' && (
+          <PersonaManageView
+            persona={activePersona}
+            onBack={() => setCurrentView('library')}
+            onUpdateMeta={handleUpdatePersonaMeta}
           />
         )}
         </div>
