@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Persona, ViewMode } from '../types';
+import { Persona, ViewMode, ARCHETYPES } from '../types';
 import { ArrowLeft, Save } from 'lucide-react';
 
 interface PersonaManageViewProps {
@@ -7,11 +7,6 @@ interface PersonaManageViewProps {
   onBack: () => void;
   onUpdateMeta: (id: string, meta: { name: string; archetype: string; identityStatement: string }) => void;
 }
-
-const ARCHETYPES = [
-  'THE STRATEGIC OPERATOR', 'THE STOIC ARCHITECT',
-  'THE ADAPTIVE PREDATOR', 'THE CALCULATED VISIONARY',
-];
 
 export const PersonaManageView: React.FC<PersonaManageViewProps> = ({
   persona, onBack, onUpdateMeta,

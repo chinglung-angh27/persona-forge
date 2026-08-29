@@ -110,3 +110,10 @@ export interface ReflectionEntry {
   sentiment: 'constructive' | 'stoic' | 'breakthrough' | 'neutral';
   tags: string[];
 }
+
+export const ARCHETYPES: string[] = [
+  'THE STRATEGIC OPERATOR',
+  'THE STOIC ARCHITECT',
+  'THE ADAPTIVE PREDATOR',
+  'THE CALCULATED VISIONARY',
+];

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ReferenceItem, ViewMode } from '../types';
+import { ReferenceItem, ViewMode, ARCHETYPES } from '../types';
 import { ArrowRight, Check } from 'lucide-react';
 
 interface CreatePersonaViewProps {
@@ -7,11 +7,6 @@ interface CreatePersonaViewProps {
   onNavigate: (view: ViewMode) => void;
   onCreate: (name: string, archetype: string, blendIds: string[]) => void;
 }
-
-const ARCHETYPES = [
-  'THE STRATEGIC OPERATOR', 'THE STOIC ARCHITECT',
-  'THE ADAPTIVE PREDATOR', 'THE CALCULATED VISIONARY',
-];
 
 export const CreatePersonaView: React.FC<CreatePersonaViewProps> = ({
   references, onNavigate, onCreate,
