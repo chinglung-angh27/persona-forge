@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LogIn, Sparkles } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 
 interface LoginViewProps {
   onLogin: (email: string) => void;
@@ -24,7 +24,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
 
       <main className="w-full max-w-md bg-[#121212] rounded-2xl neo-extruded-large p-8 md:p-12 relative z-10 flex flex-col border border-[#1e1e1e]/60">
         <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="w-4 h-4 text-[#c8c6c5]" />
+          <img src="/pf-logo.png" alt="" className="w-5 h-5 object-contain" aria-hidden="true" />
           <span className="font-mono-code text-xs text-[#8e9192] uppercase tracking-[0.25em]">
             Persona Forge
           </span>

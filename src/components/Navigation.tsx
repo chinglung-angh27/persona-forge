@@ -7,7 +7,6 @@ import {
   BookOpen,
   Bell,
   LogOut,
-  Sparkles,
   MoreHorizontal
 } from 'lucide-react';
 import { PersonaSwitcher } from './PersonaSwitcher';
@@ -59,8 +58,8 @@ export const Navigation: React.FC<NavigationProps> = ({
             onClick={() => onNavigate('today')}
             className="cursor-pointer flex items-center gap-3"
           >
-            <div className="w-9 h-9 rounded-lg bg-[#121212] neo-extruded-sm flex items-center justify-center p-1.5 border border-[#2a2a2a]/40">
-              <Sparkles className="w-5 h-5 text-[#c8c6c5]" />
+            <div className="w-9 h-9 rounded-lg bg-[#121212] neo-extruded-sm flex items-center justify-center p-1 border border-[#2a2a2a]/40">
+              <img src="/pf-logo.png" alt="Persona Forge" className="w-full h-full object-contain" />
             </div>
             <div>
               <div className="font-display text-xl font-bold tracking-tight text-[#c8c6c5]">Persona Forge</div>
@@ -105,8 +104,8 @@ export const Navigation: React.FC<NavigationProps> = ({
           className="cursor-pointer mb-6 px-3 pt-2"
         >
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-[#121212] neo-extruded flex items-center justify-center p-2 border border-[#2a2a2a]/60">
-              <Sparkles className="w-5 h-5 text-[#c8c6c5]" />
+            <div className="w-10 h-10 rounded-xl bg-[#121212] neo-extruded flex items-center justify-center p-1.5 border border-[#2a2a2a]/60">
+              <img src="/pf-logo.png" alt="Persona Forge" className="w-full h-full object-contain" />
             </div>
             <h1 className="font-display text-2xl font-bold tracking-tight text-[#c8c6c5]">
               Persona Forge
