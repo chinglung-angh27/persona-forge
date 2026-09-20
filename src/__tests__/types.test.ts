@@ -12,10 +12,10 @@ describe('type shape/contracts', () => {
   it('ViewMode covers all app views incl. persona library/manage/new', () => {
     const modes: ViewMode[] = [
       'login', 'today', 'dna', 'train', 'journal',
-      'more-persona', 'more-references', 'more-evolution', 'more-settings',
+      'more-settings',
       'library', 'persona-new', 'persona-manage',
     ];
-    expect(modes.length).toBe(12);
+    expect(modes.length).toBe(9);
   });
 
   it('Persona owns all per-persona data', () => {

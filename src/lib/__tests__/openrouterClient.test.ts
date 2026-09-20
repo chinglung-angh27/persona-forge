@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { callGemini, setMockMode } from '../geminiClient';
+import { callLLM, setMockMode } from '../openrouterClient';
 
 beforeEach(() => setMockMode(true));
 
 it('returns deterministic output without a network call', async () => {
-  const out = await callGemini({ model: 'gemini', contents: 'hello' });
+  const out = await callLLM({ model: 'openai/gpt-4o-mini', contents: 'hello' });
   expect(out).toContain('[MOCK]');
 });
 
 it('same prompt is cached (still 0 requests)', async () => {
-  const a = await callGemini({ model: 'gemini', contents: 'x' });
-  const b = await callGemini({ model: 'gemini', contents: 'x' });
+  const a = await callLLM({ model: 'openai/gpt-4o-mini', contents: 'x' });
+  const b = await callLLM({ model: 'openai/gpt-4o-mini', contents: 'x' });
   expect(a).toBe(b);
 });

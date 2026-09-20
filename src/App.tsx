@@ -8,126 +8,94 @@ import {
   HabitItem,
   ReflectionEntry,
   EvolutionItem,
+  SimulatorScenario,
+  Trait,
 } from './types';
+import { INITIAL_REFERENCES } from './data/initialData';
+import { callLLM } from './lib/openrouterClient';
 import {
-  INITIAL_SESSION,
-  INITIAL_TRAITS,
-  INITIAL_REFERENCES,
-  INITIAL_SIMULATOR_SCENARIOS,
-  INITIAL_DAILY_MISSIONS,
-  INITIAL_HABITS,
-  INITIAL_REFLECTIONS,
-  INITIAL_EVOLUTION_ITEMS,
-} from './data/initialData';
-import {
-  loadPersonas, loadActivePersonaId, savePersonas, saveActivePersonaId,
-  updateActivePersonaIn,
-  seedPersona,
-} from './lib/personaStore';
+  useSession,
+  usePersona,
+  useSimulation,
+  useJournal,
+  useNavigation,
+  useReferenceLibrary,
+} from './hooks';
 import { Navigation } from './components/Navigation';
 import { LoginView } from './components/LoginView';
 import { TodayView } from './components/TodayView';
 import { TrainView } from './components/TrainView';
+import { MultiAgentSimulator } from './components/MultiAgentSimulator';
 import { JournalView } from './components/JournalView';
 import { DNAEditorView } from './components/DNAEditorView';
 import { MoreMenu } from './components/MoreMenu';
 import { SettingsView } from './components/SettingsView';
-import { MyPersonaView } from './components/MyPersonaView';
-import { ReferenceLibraryView } from './components/ReferenceLibraryView';
-import { EvolutionView } from './components/EvolutionView';
 import { PersonaLibraryView } from './components/PersonaLibraryView';
 import { CreatePersonaView } from './components/CreatePersonaView';
 import { PersonaManageView } from './components/PersonaManageView';
 
 export default function App() {
-  // Session State
-  const [session, setSession] = useState<UserSession>(() => {
-    const saved = localStorage.getItem('pf_session');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // ponytail: a saved session with an email IS the local profile; don't force re-login.
-      return { ...parsed, isAuthenticated: Boolean(parsed.email) };
-    }
-    return INITIAL_SESSION;
-  });
+  // Session
+  const { session, handleLogin, handleLogout, handleUpdateSession } = useSession();
 
-  // Personas State
-  const [personas, setPersonas] = useState<Persona[]>(() => loadPersonas());
-  const [activePersonaId, setActivePersonaId] = useState<string>(() =>
-    loadActivePersonaId(loadPersonas())
+  // Personas
+  const {
+    personas,
+    activePersonaId,
+    activePersona,
+    setActivePersonaId,
+    handleSwitchPersona,
+    handleCreatePersona,
+    handleArchivePersona,
+    handleUpdatePersonaMeta,
+    handlePurgeData,
+    updateActivePersona,
+  } = usePersona();
+
+  // Simulation
+  const {
+    scenarios,
+    unlockedScenarioIds,
+    getUnlockedScenarios,
+    handleUnlockScenario,
+    handleCreateScenario,
+    setUnlockedScenarioIds,
+  } = useSimulation(activePersona.traits);
+
+  // Journal handlers
+  const {
+    handleToggleMission,
+    handleAddMission,
+    handleAddEvolution,
+    handleToggleHabitDay,
+    handleAddHabit,
+    handleAddReflection,
+    handleRecordSimulationResult,
+    handleGenerateReflection,
+    handleResetTraits,
+  } = useJournal({ updateActivePersona, activePersona });
+
+  // Reference Library
+  const {
+    references,
+    addReference,
+    updateReference,
+    deleteReference,
+    isInitialReference,
+  } = useReferenceLibrary();
+
+  // Navigation
+  const { currentView, setCurrentView } = useNavigation(
+    session.isAuthenticated ? 'today' : 'login',
+    activePersonaId,
+    personas
   );
 
-  // Current View
-  const [currentView, setCurrentView] = useState<ViewMode>(() => {
-    return session.isAuthenticated ? 'today' : 'login';
-  });
+  // More menu overlay state
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [shareToast, setShareToast] = useState(false);
 
-  // Reference Library State (global, not per-persona)
-  const [references] = useState<ReferenceItem[]>(INITIAL_REFERENCES);
-
-  // Scenarios State (constant, not per-persona)
-  const [scenarios] = useState(INITIAL_SIMULATOR_SCENARIOS);
-
-  // ponytail: derive active persona from personas + activePersonaId.
-  const activePersona = useMemo(
-    () => personas.find((p) => p.id === activePersonaId) ?? personas[0],
-    [personas, activePersonaId]
-  );
-
-  // ponytail: funnel all active-persona updates through one helper.
-  // Task 4 will rewrite the handlers to use this.
-  const updateActivePersona = (
-    partial: Partial<Persona> | ((p: Persona) => Persona)
-  ) => {
-    setPersonas((prev) => updateActivePersonaIn(prev, activePersonaId, partial));
-  };
-
-  // Task 7: switch active persona — bumps lastActiveAt on the newly selected one.
-  // Task 8 will own the create/library flows.
-  const handleSwitchPersona = (id: string) => {
-    setActivePersonaId(id);
-    setPersonas((prev) => updateActivePersonaIn(prev, id, { lastActiveAt: new Date().toISOString() }));
-  };
-
-  // Task 8: library/create/manage flows.
-  const handleCreatePersona = (name: string, archetype: string, blendIds: string[]) => {
-    const now = new Date().toISOString();
-    const p: Persona = {
-      id: `persona-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      name, archetype, identityStatement: '',
-      traits: INITIAL_TRAITS.map((t) => ({ ...t })),
-      blendedReferenceIds: blendIds,
-      dailyMissions: INITIAL_DAILY_MISSIONS.map((m) => ({ ...m })),
-      habits: INITIAL_HABITS.map((h) => ({ ...h })),
-      reflections: INITIAL_REFLECTIONS.map((r) => ({ ...r })),
-      evolutionItems: INITIAL_EVOLUTION_ITEMS.map((e) => ({ ...e })),
-      simulatorResults: [],
-      createdAt: now, lastActiveAt: now, status: 'active',
-    };
-    setPersonas((prev) => [...prev, p]);
-    setActivePersonaId(p.id);
-  };
-
-  const handleArchivePersona = (id: string) => {
-    setPersonas((prev) => {
-      const next = prev.map((p) => (p.id === id ? { ...p, status: 'archived' as const } : p));
-      return next;
-    });
-  };
-
-  const handleUpdatePersonaMeta = (
-    id: string,
-    meta: { name: string; archetype: string; identityStatement: string }
-  ) => {
-    setPersonas((prev) => prev.map((p) => (p.id === id ? { ...p, ...meta } : p)));
-  };
-
-  // ponytail: read-only aliases for the views Task 5/6 will rewire to activePersona.*.
-  // Handlers below mutate the active persona via updateActivePersona — no setX shims.
-  // ponytail: aliases removed — views now read activePersona.* directly.
-
-  // Derive consistencyScore from real activity (no hardcoded value).
-  // Weighted: missions 35%, habits 35%, reflections 15%, sim average 15%.
+  // Consistency score - derived from active persona
   const consistencyScore = useMemo(() => {
     const dailyMissions = activePersona?.dailyMissions ?? [];
     const habits = activePersona?.habits ?? [];
@@ -138,7 +106,7 @@ export default function App() {
     const missionPct = dailyMissions.length ? (missionDone / dailyMissions.length) * 100 : 0;
 
     const habitDays = habits.reduce((sum, h) => sum + h.days.filter(Boolean).length, 0);
-    const habitTarget = habits.reduce((sum, h) => sum + h.targetPerWeek, 0) * 7;
+    const habitTarget = habits.reduce((sum, h) => sum + h.targetPerWeek, 0); // targetPerWeek IS the weekly target
     const habitPct = habitTarget ? Math.min(100, (habitDays / habitTarget) * 100) : 0;
 
     const reflectionPct = Math.min(100, reflections.length * 10);
@@ -157,75 +125,32 @@ export default function App() {
     return Math.max(0, Math.min(100, score));
   }, [activePersona]);
 
-  // Sync to LocalStorage
-  useEffect(() => {
-    localStorage.setItem('pf_session', JSON.stringify(session));
-  }, [session]);
-
-  useEffect(() => {
-    savePersonas(personas);
-  }, [personas]);
-
-  useEffect(() => {
-    saveActivePersonaId(activePersonaId);
-  }, [activePersonaId]);
-
-  // Restore active persona from ?persona=<id> on load.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const pid = params.get('persona');
-    if (pid && personas.some((p) => p.id === pid)) {
-      setActivePersonaId(pid);
+  // Handle scenario unlock on simulation result
+  const handleRecordSimulationResultWithUnlock = (
+    scenarioId: string,
+    score: number
+  ) => {
+    handleRecordSimulationResult(scenarioId, score, scenarios);
+    if (score >= 70) {
+      const idx = scenarios.findIndex((s) => s.id === scenarioId);
+      if (idx >= 0 && idx < scenarios.length - 1) {
+        const nextId = scenarios[idx + 1].id;
+        if (!unlockedScenarioIds.includes(nextId)) {
+          setTimeout(() => handleUnlockScenario(nextId), 1500);
+        }
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Reflect active persona in the URL — but skip if the URL already carries it,
-  // so we never clobber a ?persona= the user opened with (e.g. a shared link).
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    if (url.searchParams.get('persona') === activePersonaId) return;
-    url.searchParams.set('persona', activePersonaId);
-    window.history.replaceState({}, '', url.toString());
-  }, [activePersonaId]);
-
-  // Handlers — every persona mutation funnels through updateActivePersona.
-  // ponytail: loadPersonas() already guarantees ≥1 persona, so login never needs to seed.
-  const handleLogin = (email: string) => {
-    setSession((prev) => ({ ...prev, email, isAuthenticated: true }));
-    setCurrentView('today');
   };
 
-  const handleLogout = () => {
-    setSession((prev) => ({ ...prev, isAuthenticated: false }));
-    setCurrentView('login');
-  };
-
-  const handleUpdateSession = (updated: Partial<UserSession>) => {
-    setSession((prev) => ({ ...prev, ...updated }));
-  };
-
-  // ponytail: purge nukes storage and reseeds via personaStore.seedPersona — no flat state to clear.
-  const handlePurgeData = () => {
-    localStorage.clear();
-    const p = seedPersona();
-    setPersonas([p]);
-    setActivePersonaId(p.id);
-    setSession({ ...INITIAL_SESSION, activePersonaId: p.id, isAuthenticated: false, email: '' });
-    setCurrentView('login');
-  };
-
-  const handleToggleMission = (id: string) => {
-    updateActivePersona((p) => ({
-      ...p,
-      dailyMissions: p.dailyMissions.map((m) =>
-        m.id === id ? { ...m, status: m.status === 'completed' ? 'pending' : 'completed' } : m
-      ),
-    }));
-  };
-
-  const handleAddMission = (mission: DailyMission) => {
-    updateActivePersona((p) => ({ ...p, dailyMissions: [mission, ...p.dailyMissions] }));
+  const handleSharePersona = async () => {
+    try {
+      const url = `${window.location.origin}${window.location.pathname}?persona=${activePersonaId}`;
+      await navigator.clipboard.writeText(url);
+      setShareToast(true);
+      setTimeout(() => setShareToast(false), 2000);
+    } catch {
+      console.error('Failed to share link');
+    }
   };
 
   const handleApplyReference = (ref: ReferenceItem) => {
@@ -250,70 +175,13 @@ export default function App() {
     });
   };
 
-  const handleAddEvolution = (item: Omit<EvolutionItem, 'id' | 'timestamp'>) => {
-    const newItem: EvolutionItem = {
-      ...item,
-      id: `evo-${Date.now()}`,
-      timestamp: 'Just now',
-    };
-    updateActivePersona((p) => ({ ...p, evolutionItems: [newItem, ...p.evolutionItems] }));
-  };
-
-  const handleToggleHabitDay = (habitId: string, dayIndex: number) => {
-    updateActivePersona((p) => ({
-      ...p,
-      habits: p.habits.map((h) => {
-        if (h.id !== habitId) return h;
-        const days = [...h.days];
-        days[dayIndex] = !days[dayIndex];
-        const streak = days[dayIndex] ? h.streak + 1 : Math.max(0, h.streak - 1);
-        return { ...h, days, streak };
-      }),
-    }));
-  };
-
-  const handleAddHabit = (habit: HabitItem) => {
-    updateActivePersona((p) => ({ ...p, habits: [...p.habits, habit] }));
-  };
-
-  const handleAddReflection = (entry: ReflectionEntry) => {
-    updateActivePersona((p) => ({ ...p, reflections: [entry, ...p.reflections] }));
-  };
-
-  const handleRecordSimulationResult = (scenarioId: string, score: number) => {
-    updateActivePersona((p) => {
-      const newEvolution: EvolutionItem = {
-        id: `evo-sim-${Date.now()}`,
-        title: 'Crucible Test Completed',
-        description: `Executed tactical response in simulation. Achieved ${score}% alignment with core archetype.`,
-        icon: 'balance',
-        timestamp: 'Just now',
-        category: 'Simulation Audit',
-        changeValue: `${score}% Match`,
-      };
-      return {
-        ...p,
-        evolutionItems: [newEvolution, ...p.evolutionItems],
-        simulatorResults: [...p.simulatorResults, { scenarioId, score, ts: new Date().toISOString() }],
-      };
-    });
-  };
-
-  const handleResetTraits = () => {
-    updateActivePersona((p) => ({ ...p, traits: INITIAL_TRAITS.map((t) => ({ ...t })) }));
-  };
-
-  // ponytail: track the More sheet as overlay state, not a route.
-  // When open, it sits on top of whatever demoted view the user picks.
-  const [moreOpen, setMoreOpen] = useState(false);
-
   // If in login view, render clean single login screen
   if (currentView === 'login') {
     return <LoginView onLogin={handleLogin} />;
   }
 
   return (
-    <div className="min-h-screen bg-[#121212] text-[#e5e2e1] flex antialiased selection:bg-[#c8c6c5] selection:text-[#121212]">
+    <div className="min-h-screen bg-[#121212] text-[#e5e2e1] flex antialiased selection:bg-[#c8c6c5] selection:text-[#121212] h-[2048px]">
       {/* Navigation (Desktop Sidebar & Mobile Dock) */}
       <Navigation
         currentView={currentView}
@@ -330,8 +198,28 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 min-w-0 md:ml-72 p-4 sm:p-6 md:p-10 lg:p-12 mb-20 md:mb-0">
-        <div key={currentView} className="animate-view-in">
+      <main className="flex-1 min-w-0 md:ml-72 p-4 sm:p-6 md:p-10 lg:p-12 pt-[150px] md:pt-10 lg:pt-12 mb-20 md:mb-0 h-[2018px] -translate-y-[32px]">
+        {currentView === 'train' && (
+          <div className="w-full max-w-7xl mx-auto pb-16 -translate-y-[11px] h-[2000px]">
+            <TrainView
+              scenarios={getUnlockedScenarios()}
+              allScenarios={scenarios}
+              unlockedScenarioIds={unlockedScenarioIds}
+              activeTraits={activePersona.traits}
+              references={references}
+              blendedReferences={activePersona.blendedReferenceIds}
+              onRecordSimulationResult={handleRecordSimulationResultWithUnlock}
+              onGenerateReflection={handleGenerateReflection}
+              onCreateScenario={handleCreateScenario}
+              onApplyReference={handleApplyReference}
+              onAddReference={addReference}
+              onUpdateReference={updateReference}
+              onDeleteReference={deleteReference}
+              isInitialReference={isInitialReference}
+            />
+          </div>
+        )}
+        <div key={currentView} className="animate-view-in h-[1980px]">
         {currentView === 'today' && (
           <TodayView
             userName={activePersona.name}
@@ -359,17 +247,6 @@ export default function App() {
           />
         )}
 
-        {currentView === 'train' && (
-          <TrainView
-            scenarios={scenarios}
-            activeTraits={activePersona.traits}
-            references={references}
-            blendedReferences={activePersona.blendedReferenceIds}
-            onRecordSimulationResult={handleRecordSimulationResult}
-            onApplyReference={handleApplyReference}
-          />
-        )}
-
         {currentView === 'journal' && (
           <JournalView
             habits={activePersona.habits}
@@ -382,40 +259,12 @@ export default function App() {
           />
         )}
 
-        {currentView === 'more-persona' && (
-          <MyPersonaView
-            personaName={activePersona.name}
-            archetype={activePersona.archetype}
-            traits={activePersona.traits}
-            blendedReferences={activePersona.blendedReferenceIds}
-            allReferences={references}
-            consistencyScore={consistencyScore}
-            onNavigate={setCurrentView}
-          />
-        )}
-
-        {currentView === 'more-references' && (
-          <ReferenceLibraryView
-            references={references}
-            activeTraits={activePersona.traits}
-            onApplyReference={handleApplyReference}
-            blendedReferences={activePersona.blendedReferenceIds}
-          />
-        )}
-
-        {currentView === 'more-evolution' && (
-          <EvolutionView
-            evolutionItems={activePersona.evolutionItems}
-            traits={activePersona.traits}
-            consistencyScore={consistencyScore}
-          />
-        )}
-
         {currentView === 'more-settings' && (
           <SettingsView
             session={session}
             onUpdateSession={handleUpdateSession}
             onPurgeData={handlePurgeData}
+            onSharePersona={handleSharePersona}
           />
         )}
 
@@ -431,7 +280,7 @@ export default function App() {
 
         {currentView === 'persona-new' && (
           <CreatePersonaView
-            references={references}
+            references={INITIAL_REFERENCES}
             onNavigate={setCurrentView}
             onCreate={handleCreatePersona}
           />
@@ -452,6 +301,7 @@ export default function App() {
         open={moreOpen}
         onClose={() => setMoreOpen(false)}
         onNavigate={setCurrentView}
+        onSharePersona={handleSharePersona}
       />
     </div>
   );

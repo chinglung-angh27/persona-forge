@@ -8,21 +8,24 @@ import {
   CheckCircle,
   Download,
   Upload,
-  AlertTriangle
+  AlertTriangle,
+  Share2
 } from 'lucide-react';
 
 interface SettingsViewProps {
   session: UserSession;
   onUpdateSession: (updated: Partial<UserSession>) => void;
   onPurgeData: () => void;
+  onSharePersona?: () => void;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
   session,
   onUpdateSession,
-  onPurgeData
+  onPurgeData,
+  onSharePersona,
 }) => {
-  const [email, setEmail] = useState(session.email || 'x.architect@forge.ai');
+  const [email, setEmail] = useState(session.email || '');
   const [intensity, setIntensity] = useState<'Passive' | 'Balanced' | 'Aggressive'>(
     session.modelIntensity || 'Aggressive'
   );
@@ -32,6 +35,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   const [tactileSound, setTactileSound] = useState(true);
   const [showPurgeConfirm, setShowPurgeConfirm] = useState(false);
   const [saveToast, setSaveToast] = useState(false);
+  const [shareToast, setShareToast] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [importSuccess, setImportSuccess] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
@@ -134,6 +138,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
       )}
 
+      {/* Share confirmation toast */}
+      {shareToast && (
+        <div className="p-4 rounded-xl neo-extruded bg-[#121212] border border-[#2a2a2a] text-[#c8c6c5] font-mono-code text-xs flex items-center justify-between animate-fade-in">
+          <div className="flex items-center gap-2">
+            <Share2 className="w-4 h-4" />
+            <span>Share link copied to clipboard.</span>
+          </div>
+        </div>
+      )}
+
       {/* Main Settings Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {/* Account & Profile Card */}
@@ -155,7 +169,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="neo-input bg-[#121212] font-body text-base text-[#e5e2e1] p-4 rounded-xl w-full border border-[#1e1e1e] placeholder-[#7e7d7d]"
-                  placeholder="x.architect@forge.ai"
+                  placeholder="you@example.com"
                 />
               </div>
             </div>
@@ -181,6 +195,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 <Trash2 className="w-4 h-4 text-[#ffb4ab]" />
                 <span>PURGE DATA</span>
               </button>
+
+              {onSharePersona && (
+                <button
+                  type="button"
+                  onClick={() => { onSharePersona(); setShareToast(true); setTimeout(() => setShareToast(false), 2000); }}
+                  className="neo-btn font-mono-code text-xs text-[#c8c6c5] hover:text-white px-5 py-3 rounded-xl flex items-center gap-2 border border-[#2a2a2a] cursor-pointer"
+                  aria-label="Share persona link"
+                >
+                  <Share2 className="w-4 h-4" />
+                  <span>SHARE</span>
+                </button>
+              )}
 
               <button
                 type="submit"

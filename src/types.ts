@@ -1,8 +1,7 @@
 // Primary nav surface: 4 tabs + More menu sub-routes for demoted features.
 export type ViewMode =
   | 'login' | 'today' | 'dna' | 'train' | 'journal'
-  | 'more-persona' | 'more-references' | 'more-evolution' | 'more-settings'
-  | 'library' | 'persona-new' | 'persona-manage';
+  | 'library' | 'persona-new' | 'persona-manage' | 'more-settings';
 
 export interface UserSession {
   email: string;
@@ -65,6 +64,7 @@ export interface DailyMission {
   category: string;
   xp: number;
   urgent?: boolean;
+  date?: string;
 }
 
 export interface EvolutionItem {
@@ -98,6 +98,7 @@ export interface HabitItem {
   streak: number;
   targetPerWeek: number;
   days: boolean[]; // 7 days of current week
+  completedDates?: string[];
   icon: string;
   category: string;
 }

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.personaforge.app",
+      "sha256_cert_fingerprints": [
+        "66:65:BC:9F:CE:70:22:C3:E7:CD:6E:C2:6A:9A:2D:05:C3:5B:3F:03:B9:1E:8F:04:D8:4F:09:85:FB:71:66:1F"
+      ]
+    }
+  }
+]

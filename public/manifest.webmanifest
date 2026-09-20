@@ -1,0 +1,45 @@
+{
+  "name": "Persona Forge - Evolution Engine",
+  "short_name": "Persona Forge",
+  "description": "An Obsidian Tactile psychological evolution engine for calibrating persona DNA, testing simulations, and mastering daily operations.",
+  "start_url": "/?utm_source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle", "health"],
+  "icons": [
+    {
+      "src": "/pf-logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/pf-logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today",
+      "short_name": "Today",
+      "description": "Open today's daily operations",
+      "url": "/?view=today&utm_source=pwa",
+      "icons": [{ "src": "/pf-logo-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "My Persona",
+      "short_name": "Persona",
+      "description": "Open my persona DNA",
+      "url": "/?view=persona&utm_source=pwa",
+      "icons": [{ "src": "/pf-logo-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

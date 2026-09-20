@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
-import { ViewMode, DailyMission, EvolutionItem, ARCHETYPES } from '../types';
+import { ViewMode, DailyMission, ARCHETYPES } from '../types';
 import {
   ArrowRight,
   CheckCircle2,
-  TrendingUp,
-  Sun,
-  Scale,
-  Zap,
   Cpu,
-  Fingerprint
+  Fingerprint,
+  Zap
 } from 'lucide-react';
 
 interface TodayViewProps {
@@ -17,7 +14,6 @@ interface TodayViewProps {
   identityStatement?: string;
   consistencyScore: number;
   dailyMissions: DailyMission[];
-  evolutionItems: EvolutionItem[];
   predictiveInsights: boolean;
   onNavigate: (view: ViewMode) => void;
   onToggleMission: (id: string) => void;
@@ -29,7 +25,6 @@ export const TodayView: React.FC<TodayViewProps> = ({
   identityStatement,
   consistencyScore,
   dailyMissions,
-  evolutionItems,
   predictiveInsights,
   onNavigate,
   onToggleMission
@@ -38,7 +33,6 @@ export const TodayView: React.FC<TodayViewProps> = ({
   const suggestedFocus = (() => {
     const pending = dailyMissions.filter((m) => m.status !== 'completed');
     if (pending.length > 0) return `Clear ${pending.length} open mission${pending.length > 1 ? 's' : ''} to lift alignment.`;
-    if (evolutionItems.length === 0) return 'Log your first evolution breakthrough to start the chain.';
     return 'Maintain streak — run a simulator crucible to stress-test the persona.';
   })();
 
@@ -210,76 +204,6 @@ export const TodayView: React.FC<TodayViewProps> = ({
             </div>
           )}
         </div>
-      </div>
-
-      {/* Recent Evolution Section */}
-      <div className="neo-card rounded-2xl p-8 bg-[#121212] border border-[#1e1e1e]/60">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="font-display text-2xl text-[#e5e2e1] font-semibold tracking-tight">
-              Recent Evolution
-            </h3>
-            <p className="font-mono-code text-xs text-[#8e9192] mt-1">
-              Your latest breakthroughs
-            </p>
-          </div>
-
-          <button
-            onClick={() => onNavigate('more-evolution')}
-            className="neo-recessed px-4 py-2 rounded-xl text-xs font-mono-code text-[#8e9192] hover:text-[#c8c6c5] border border-[#1e1e1e]"
-          >
-            See all &rarr;
-          </button>
-        </div>
-
-        {evolutionItems.length === 0 ? (
-          <div className="neo-recessed p-8 rounded-xl text-center border border-[#1e1e1e]">
-            <p className="font-body text-sm text-[#8e9192]">No breakthroughs yet.</p>
-            <p className="font-mono-code text-[11px] text-[#7e7d7d] mt-2">
-              Log one in <span className="text-[#c8c6c5]">Journal &rarr; Timeline</span> when you embody your archetype under pressure.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {evolutionItems.slice(0, 4).map((item, idx) => (
-              <div
-                key={item.id || idx}
-                className="neo-recessed p-6 rounded-xl flex items-start gap-4 border border-[#1e1e1e] hover:border-[#2a2a2a] transition-colors"
-              >
-                <div className="neo-extruded p-3.5 rounded-full text-[#c8c6c5] bg-[#121212] shrink-0 border border-[#2a2a2a]/60">
-                  {item.icon === 'wb_sunny' ? (
-                    <Sun className="w-5 h-5 text-amber-300/90" />
-                  ) : item.icon === 'balance' ? (
-                    <Scale className="w-5 h-5 text-[#c8c6c5]" />
-                  ) : item.icon === 'trending_up' ? (
-                    <TrendingUp className="w-5 h-5 text-emerald-400/90" />
-                  ) : (
-                    <Zap className="w-5 h-5 text-[#c8c6c5]" />
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <h4 className="font-display text-base font-semibold text-[#e5e2e1]">
-                      {item.title}
-                    </h4>
-                    {item.changeValue && (
-                      <span className="font-mono-code text-[11px] px-2 py-0.5 rounded bg-[#1c1b1b] neo-recessed text-[#c8c6c5] font-medium shrink-0">
-                        {item.changeValue}
-                      </span>
-                    )}
-                  </div>
-                  <p className="font-body text-sm text-[#8e9192] leading-relaxed">
-                    {item.description}
-                  </p>
-                  <div className="mt-2 font-mono-code text-[10px] text-[#7e7d7d]">
-                    {item.timestamp}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Quick links */}

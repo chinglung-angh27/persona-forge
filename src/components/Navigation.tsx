@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ViewMode, Persona } from '../types';
 import {
   Sun,
@@ -7,7 +7,10 @@ import {
   BookOpen,
   Bell,
   LogOut,
-  MoreHorizontal
+  MoreHorizontal,
+  Plus,
+  Library,
+  Check,
 } from 'lucide-react';
 import { PersonaSwitcher } from './PersonaSwitcher';
 
@@ -47,7 +50,77 @@ export const Navigation: React.FC<NavigationProps> = ({
     { id: 'journal',  label: 'Journal',icon: <BookOpen className="w-5 h-5" />,    hint: 'Habits, reflections, history' },
   ];
 
-  const isMoreOpen = currentView.startsWith('more-');
+  const isMoreOpen = currentView === 'more-settings';
+
+  // Compact persona picker that lives in the mobile top nav.
+  // Renders the active persona's initial as a circular icon; tapping opens
+  // a dropdown with the persona list + Library + Create (same surface as
+  // the desktop PersonaSwitcher, but in a popover rather than a sidebar block).
+  const PersonaTrigger: React.FC<{
+    personas: Persona[];
+    activePersonaId: string;
+    onSwitch: (id: string) => void;
+    onOpenLibrary: () => void;
+    onOpenCreate: () => void;
+  }> = ({ personas, activePersonaId, onSwitch, onOpenLibrary, onOpenCreate }) => {
+    const [open, setOpen] = useState(false);
+    const active = personas.find((p) => p.id === activePersonaId);
+
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className={`w-10 h-10 rounded-full bg-[#121212] neo-btn flex items-center justify-center text-[#c8c6c5] hover:text-white ${open ? 'neo-recessed border border-[#c8c6c5]' : ''}`}
+          title={`Persona: ${active?.name || 'None'}`}
+          aria-label="Switch persona"
+        >
+          <span className="font-display text-sm font-bold text-[#c8c6c5]">
+            {(active?.name || '?').charAt(0).toUpperCase()}
+          </span>
+        </button>
+
+        {open && (
+          <>
+            {/* Click-away catcher. */}
+            <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+            <div className="absolute right-0 mt-2 w-64 z-40 bg-[#161616] neo-extruded-large rounded-2xl p-2 border border-[#2a2a2a] shadow-2xl">
+              <div className="px-2 py-1.5 font-mono-code text-[10px] text-[#8e9192] uppercase tracking-widest">
+                Active Persona
+              </div>
+              {personas.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => { onSwitch(p.id); setOpen(false); }}
+                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left hover:bg-[#1f1f1f]"
+                >
+                  <span className="flex-1 min-w-0">
+                    <span className="block font-mono-code text-sm text-[#e5e2e1] truncate">{p.name}</span>
+                    <span className="block font-body text-[11px] text-[#8e9192] truncate">{p.archetype}</span>
+                  </span>
+                  {p.id === activePersonaId && <Check className="w-4 h-4 text-[#c8c6c5] shrink-0" />}
+                </button>
+              ))}
+              <div className="border-t border-[#1e1e1e] my-1.5" />
+              <button
+                onClick={() => { onOpenLibrary(); setOpen(false); }}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left hover:bg-[#1f1f1f] text-[#c8c6c5]"
+              >
+                <Library className="w-4 h-4" />
+                <span className="font-mono-code text-sm">Persona Library</span>
+              </button>
+              <button
+                onClick={() => { onOpenCreate(); setOpen(false); }}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left hover:bg-[#1f1f1f] text-[#c8c6c5]"
+              >
+                <Plus className="w-4 h-4" />
+                <span className="font-mono-code text-sm">Create Persona</span>
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -76,24 +149,15 @@ export const Navigation: React.FC<NavigationProps> = ({
               <Bell className="w-4 h-4" />
             </button>
 
-            <button
-              onClick={onOpenMore}
-              className={`w-10 h-10 rounded-full bg-[#121212] neo-extruded flex items-center justify-center overflow-hidden border ${isMoreOpen ? 'border-[#c8c6c5]' : 'border-[#2a2a2a]'}`}
-              title="More"
-            >
-              <MoreHorizontal className="w-5 h-5 text-[#c8c6c5]" />
-            </button>
+            <PersonaTrigger
+              personas={personas}
+              activePersonaId={activePersonaId}
+              onSwitch={onSwitchPersona}
+              onOpenLibrary={onOpenLibrary}
+              onOpenCreate={onOpenCreate}
+            />
           </div>
         </div>
-
-        {/* PersonaSwitcher — compact on mobile top bar */}
-        <PersonaSwitcher
-          personas={personas}
-          activePersonaId={activePersonaId}
-          onSwitch={onSwitchPersona}
-          onOpenLibrary={onOpenLibrary}
-          onOpenCreate={onOpenCreate}
-        />
       </header>
 
       {/* Desktop Sidebar Navigation */}

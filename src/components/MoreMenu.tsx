@@ -1,25 +1,29 @@
 import React from 'react';
 import { ViewMode } from '../types';
-import { UserCheck, Bookmark, TrendingUp, Settings, X, Library } from 'lucide-react';
+import { UserCheck, Bookmark, TrendingUp, Settings, X, Library, Share2 } from 'lucide-react';
 
 interface MoreMenuProps {
   open: boolean;
   onClose: () => void;
   onNavigate: (view: ViewMode) => void;
+  onSharePersona?: () => void;
 }
 
-const ENTRIES: { id: ViewMode; label: string; hint: string; icon: React.ReactNode }[] = [
+const ENTRIES: { id: ViewMode | 'share'; label: string; hint: string; icon: React.ReactNode; action?: 'share' }[] = [
   { id: 'library',         label: 'Persona Library', hint: 'Switch, create, manage personas',       icon: <Library className="w-5 h-5" /> },
-  { id: 'more-persona',    label: 'My Persona',     hint: 'Profile, archetype, blended references', icon: <UserCheck className="w-5 h-5" /> },
-  { id: 'more-references', label: 'Reference Library', hint: 'Browse and apply archetypes',        icon: <Bookmark className="w-5 h-5" /> },
-  { id: 'more-evolution',  label: 'Evolution Log',  hint: 'Full history of breakthroughs',         icon: <TrendingUp className="w-5 h-5" /> },
   { id: 'more-settings',   label: 'Settings',       hint: 'Account, AI intensity, data',           icon: <Settings className="w-5 h-5" /> },
+  { id: 'share',           label: 'Share Persona',  hint: 'Copy a link to this persona',           icon: <Share2 className="w-5 h-5" />, action: 'share' },
 ];
 
-export const MoreMenu: React.FC<MoreMenuProps> = ({ open, onClose, onNavigate }) => {
+export const MoreMenu: React.FC<MoreMenuProps> = ({ open, onClose, onNavigate, onSharePersona }) => {
   if (!open) return null;
 
-  const handlePick = (id: ViewMode) => {
+  const handlePick = (id: ViewMode | 'share', action?: 'share') => {
+    if (action === 'share' && onSharePersona) {
+      onSharePersona();
+      onClose();
+      return;
+    }
     onNavigate(id);
     onClose();
   };
@@ -45,14 +49,14 @@ export const MoreMenu: React.FC<MoreMenuProps> = ({ open, onClose, onNavigate })
         </div>
 
         <p className="font-mono-code text-[11px] text-[#8e9192] uppercase tracking-widest mb-4">
-          Less-used features
+          MORE features
         </p>
 
         <div className="flex flex-col gap-1.5">
           {ENTRIES.map((e) => (
             <button
               key={e.id}
-              onClick={() => handlePick(e.id)}
+              onClick={() => handlePick(e.id, e.action)}
               className="flex items-center gap-3.5 px-4 py-3 rounded-xl text-left neo-extruded-sm bg-[#121212] hover:text-[#e5e2e1] text-[#c8c6c5]"
               style={{ transition: 'color 150ms ease, box-shadow 150ms ease' }}
             >

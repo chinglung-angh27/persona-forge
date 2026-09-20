@@ -17,6 +17,8 @@ import {
   Zap,
   BookOpen
 } from 'lucide-react';
+import { CalendarPicker } from './ui/calendar';
+import { StreakAnalytics, WeeklyHeatmap } from './StreakAnalytics';
 
 interface JournalViewProps {
   habits: HabitItem[];
@@ -43,6 +45,7 @@ export const JournalView: React.FC<JournalViewProps> = ({
   onAddEvolution
 }) => {
   const [openModal, setOpenModal] = useState<'habit' | 'reflection' | 'win' | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [habitName, setHabitName] = useState('');
   const [habitCategory, setHabitCategory] = useState('Execution Protocol');
   const [reflPrompt, setReflPrompt] = useState(
@@ -135,6 +138,30 @@ export const JournalView: React.FC<JournalViewProps> = ({
           </button>
         </div>
       </header>
+
+      {/* CALENDAR */}
+      <section>
+        <h2 className="font-mono-code text-xs uppercase tracking-widest text-[#8e9192] mb-3 flex items-center gap-2">
+          <Calendar className="w-3.5 h-3.5" />
+          {selectedDate
+            ? selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', weekday: 'long' })
+            : 'Journal Date'}
+        </h2>
+        <div className="neo-card bg-[#121212] p-5 rounded-2xl border border-[#1e1e1e]/60 inline-block neo-extruded-sm">
+          <CalendarPicker
+            mode="single"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            className="bg-[#121212]"
+          />
+          <div className="border-t border-[#1e1e1e] mt-4 pt-4">
+            <WeeklyHeatmap habits={habits} />
+          </div>
+        </div>
+      </section>
+
+      {/* STREAK ANALYTICS */}
+      <StreakAnalytics habits={habits} />
 
       {/* HABITS */}
       <section>

@@ -190,7 +190,7 @@ export const DNAEditorView: React.FC<DNAEditorViewProps> = ({
             </div>
 
             {/* Actions Toolbar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-[#1e1e1e]">
+              <div className="flex flex-wrap items-center justify-center gap-4 pt-6 border-t border-[#1e1e1e]">
               <button
                 onClick={handleReset}
                 className="px-6 py-3 rounded-xl font-mono-code text-xs text-[#8e9192] hover:text-[#e5e2e1] neo-btn flex items-center gap-2 border border-[#2a2a2a] cursor-pointer"
@@ -247,8 +247,8 @@ export const DNAEditorView: React.FC<DNAEditorViewProps> = ({
                   <CheckCircle className="w-4 h-4 text-[#8e9192] shrink-0 mt-0.5" />
                   <span>
                     {creativity > 70
-                      ? 'High likelihood of initiating original, high-leverage projects.'
-                      : 'Executes structured established playbooks.'}
+                      ? 'Initiates original projects.'
+                      : 'Follows structured playbooks.'}
                   </span>
                 </li>
 
@@ -256,8 +256,8 @@ export const DNAEditorView: React.FC<DNAEditorViewProps> = ({
                   <CheckCircle className="w-4 h-4 text-[#8e9192] shrink-0 mt-0.5" />
                   <span>
                     {confidence > 70
-                      ? 'Assertive and frame-controlling communication in simulator.'
-                      : 'Measured, diplomatic communication style.'}
+                      ? 'Assertive communication.'
+                      : 'Diplomatic communication.'}
                   </span>
                 </li>
 
@@ -269,8 +269,8 @@ export const DNAEditorView: React.FC<DNAEditorViewProps> = ({
                   )}
                   <span className={composure < 60 ? 'text-[#ffb4ab]' : ''}>
                     {composure < 60
-                      ? 'Potential for reactive decisions during sudden crisis events.'
-                      : 'High physiological composure during sudden black-swan events.'}
+                      ? 'Reactive under crisis.'
+                      : 'Composed under crisis.'}
                   </span>
                 </li>
 
@@ -278,8 +278,8 @@ export const DNAEditorView: React.FC<DNAEditorViewProps> = ({
                   <CheckCircle className="w-4 h-4 text-[#8e9192] shrink-0 mt-0.5" />
                   <span>
                     {discipline > 70
-                      ? 'Adheres to morning priming protocols with 90%+ probability.'
-                      : 'Requires external accountability forcing functions.'}
+                      ? 'Self-directed protocols.'
+                      : 'Needs external accountability.'}
                   </span>
                 </li>
               </ul>

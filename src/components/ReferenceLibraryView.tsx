@@ -1,32 +1,83 @@
 import React, { useState } from 'react';
 import { ReferenceItem, Trait } from '../types';
-import { Search, Plus, Check, Sparkles, Quote, X } from 'lucide-react';
+import { Search, Plus, Check, Sparkles, Quote, X, Edit, Trash2 } from 'lucide-react';
+import { ReferenceEditorView } from './ReferenceEditorView';
 
 interface ReferenceLibraryViewProps {
   references: ReferenceItem[];
   activeTraits: Trait[];
   onApplyReference: (ref: ReferenceItem) => void;
   blendedReferences: string[];
+  onAddReference?: (ref: Omit<ReferenceItem, 'id'>) => void;
+  onUpdateReference?: (id: string, ref: Partial<ReferenceItem>) => void;
+  onDeleteReference?: (id: string) => void;
+  isInitialReference?: (id: string) => boolean;
 }
 
 export const ReferenceLibraryView: React.FC<ReferenceLibraryViewProps> = ({
   references,
   activeTraits,
   onApplyReference,
-  blendedReferences
+  blendedReferences,
+  onAddReference,
+  onUpdateReference,
+  onDeleteReference,
+  isInitialReference
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedReference, setSelectedReference] = useState<ReferenceItem | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showEditor, setShowEditor] = useState(false);
+  const [editingReference, setEditingReference] = useState<ReferenceItem | null>(null);
 
   const categories = [
     'All',
     'Tech Visionaries',
     'Athletes',
     'Fictional',
-    'Historical'
+    'Historical',
+    'Philosophers'
   ];
+
+  const handleAddNewReference = () => {
+    setEditingReference(null);
+    setShowEditor(true);
+  };
+
+  const handleEditReference = (ref: ReferenceItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingReference(ref);
+    setShowEditor(true);
+  };
+
+  const handleDeleteReference = (ref: ReferenceItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onDeleteReference || isInitialReference?.(ref.id)) return;
+    if (window.confirm(`Delete "${ref.name}"? This cannot be undone.`)) {
+      onDeleteReference(ref.id);
+      setToastMessage(`Deleted ${ref.name}`);
+      setTimeout(() => setToastMessage(null), 3000);
+    }
+  };
+
+  const handleEditorSave = (ref: Omit<ReferenceItem, 'id'>) => {
+    if (editingReference && onUpdateReference) {
+      onUpdateReference(editingReference.id, ref);
+      setToastMessage(`Updated ${ref.name}`);
+    } else if (onAddReference) {
+      onAddReference(ref);
+      setToastMessage(`Added ${ref.name}`);
+    }
+    setTimeout(() => setToastMessage(null), 3000);
+    setShowEditor(false);
+    setEditingReference(null);
+  };
+
+  const handleEditorClose = () => {
+    setShowEditor(false);
+    setEditingReference(null);
+  };
 
   const filteredReferences = references.filter((ref) => {
     const matchesCategory =
@@ -51,9 +102,21 @@ export const ReferenceLibraryView: React.FC<ReferenceLibraryViewProps> = ({
     <div className="w-full max-w-7xl mx-auto space-y-8 pb-16">
       {/* Header & Global Search */}
       <div className="pt-2">
-        <h1 className="font-display text-4xl md:text-5xl text-[#e5e2e1] font-bold mb-6 tracking-tight">
-          Reference Library
-        </h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="font-display text-4xl md:text-5xl text-[#e5e2e1] font-bold tracking-tight">
+            Reference Library
+          </h1>
+          {onAddReference && (
+            <button
+              onClick={handleAddNewReference}
+              className="neo-btn px-6 py-3 rounded-xl font-mono-code text-xs font-semibold text-[#121212] bg-[#c8c6c5] hover:bg-white flex items-center gap-2"
+              aria-label="Add new reference"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Reference</span>
+            </button>
+          )}
+        </div>
 
         {/* Global Search - Recessed Well */}
         <div className="w-full max-w-2xl relative neo-recessed rounded-full bg-[#121212] flex items-center px-6 py-3.5 border border-[#1e1e1e]">
@@ -144,6 +207,28 @@ export const ReferenceLibraryView: React.FC<ReferenceLibraryViewProps> = ({
                   <h2 className="font-display text-2xl text-[#e5e2e1] font-bold group-hover:text-white transition-colors">
                     {ref.name}
                   </h2>
+                  {(onUpdateReference || onDeleteReference) && !isInitialReference?.(ref.id) && (
+                    <div className="flex items-center gap-1">
+                      {onUpdateReference && (
+                        <button
+                          onClick={(e) => handleEditReference(ref, e)}
+                          className="p-1.5 rounded-lg neo-recessed text-[#8e9192] hover:text-[#e5e2e1] transition-colors"
+                          aria-label={`Edit ${ref.name}`}
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {onDeleteReference && (
+                        <button
+                          onClick={(e) => handleDeleteReference(ref, e)}
+                          className="p-1.5 rounded-lg neo-recessed text-[#8e9192] hover:text-[#ffb4ab] transition-colors"
+                          aria-label={`Delete ${ref.name}`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <p className="font-mono-code text-xs text-[#8e9192] uppercase tracking-[0.2em] mb-4">
                   {ref.title}
@@ -291,6 +376,16 @@ export const ReferenceLibraryView: React.FC<ReferenceLibraryViewProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Reference Editor Modal */}
+      {showEditor && (
+        <ReferenceEditorView
+          initialRef={editingReference}
+          onClose={handleEditorClose}
+          onSave={handleEditorSave}
+          isInitial={editingReference ? isInitialReference?.(editingReference.id) : false}
+        />
       )}
     </div>
   );

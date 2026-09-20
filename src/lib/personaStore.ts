@@ -3,6 +3,7 @@ import {
   INITIAL_REFLECTIONS, INITIAL_EVOLUTION_ITEMS,
 } from '../data/initialData';
 import { Persona, Trait, ARCHETYPES } from '../types';
+import { normalizeJournalDates } from './journalDates';
 
 const PERSONAS_KEY = 'pf_personas';
 const ACTIVE_KEY = 'pf_activePersonaId';
@@ -61,6 +62,9 @@ export function migrateLegacy(): { personas: Persona[]; activeId: string } | nul
   p.habits = read('pf_habits', p.habits);
   p.reflections = read('pf_reflections', p.reflections);
   p.evolutionItems = read('pf_evolution', p.evolutionItems);
+  const normalized = normalizeJournalDates(p.habits, p.dailyMissions, new Date());
+  p.habits = normalized.habits;
+  p.dailyMissions = normalized.missions;
 
   LEGACY_KEYS.forEach((k) => localStorage.removeItem(k));
   return { personas: [p], activeId: p.id };
@@ -77,7 +81,13 @@ export function loadPersonas(): Persona[] {
   if (raw) {
     try {
       const parsed = JSON.parse(raw) as Persona[];
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const today = new Date();
+        return parsed.map((persona) => {
+          const normalized = normalizeJournalDates(persona.habits, persona.dailyMissions, today);
+          return { ...persona, habits: normalized.habits, dailyMissions: normalized.missions };
+        });
+      }
     } catch {
       /* fall through to seed */
     }
